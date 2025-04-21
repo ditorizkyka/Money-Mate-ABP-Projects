@@ -1,0 +1,29 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "money_mate_mobile",
+            "cwd": "money_mate_mobile",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "money_mate_mobile (profile mode)",
+            "cwd": "money_mate_mobile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "money_mate_mobile (release mode)",
+            "cwd": "money_mate_mobile",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}
