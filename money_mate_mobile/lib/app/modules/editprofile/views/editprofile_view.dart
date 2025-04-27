@@ -203,11 +203,23 @@ class EditprofileView extends GetView<EditprofileController> {
                                     "Are you sure you want to update your account? if you delete it, you will never get it comeback",
                                 confirmBtn: "Update",
                                 nextEvent: () async {
-                                  await controller.updateUser(
-                                    FirebaseAuth.instance.currentUser!.uid,
-                                    nameController.text,
-                                    int.parse(spentController.text),
-                                  );
+                                  if (spentController.text.isEmpty) {
+                                    await controller.updateUser(
+                                      FirebaseAuth.instance.currentUser!.uid,
+                                      nameController.text,
+
+                                      -1,
+                                    );
+                                  } else {
+                                    await controller.updateUser(
+                                      FirebaseAuth.instance.currentUser!.uid,
+                                      nameController.text,
+
+                                      int.parse(spentController.text),
+                                    );
+                                  }
+                                  ;
+
                                   Navigator.pop(context);
                                 },
                               );

@@ -9,9 +9,6 @@ class EditprofileController extends GetxController {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'limit': limit,
       });
-      await FirebaseFirestore.instance.collection('users').doc(userId).update({
-        'limit': limit,
-      });
     } else if (limit < 0 && newName.isNotEmpty) {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'name': newName,
