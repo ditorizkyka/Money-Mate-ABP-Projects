@@ -17,7 +17,7 @@ class DashboardView extends GetView<DashboardController> {
     final DashboardController dashboardController = Get.put(
       DashboardController(),
     );
-    dashboardController.detailCostInit();
+    // dashboardController.detailCostInit();
     return Scaffold(
       backgroundColor: ColorApp.primaryGrey,
       body: Obx(

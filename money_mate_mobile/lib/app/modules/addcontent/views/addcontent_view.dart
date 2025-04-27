@@ -20,10 +20,7 @@ class AddcontentView extends GetView<AddcontentController> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         centerTitle: true,
-        title: Text(
-          "Add Action",
-          style: TypographyApp.titleField,
-        ),
+        title: Text("Add Action", style: TypographyApp.titleField),
       ),
       backgroundColor: ColorApp.primaryGrey,
       body: SingleChildScrollView(
@@ -42,12 +39,15 @@ class AddcontentView extends GetView<AddcontentController> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text("Tambahkan kebutuhan anda!",
-                            style: TypographyApp.headline1),
+                        Text(
+                          "Tambahkan kebutuhan anda!",
+                          style: TypographyApp.headline1,
+                        ),
                         Gap.h8,
                         Text(
-                            "Seluruh kebutuhan keuangan anda disimpan dalam database kami, anda bisa melihat report dan statistik jingan ingin!",
-                            style: TypographyApp.desc),
+                          "Seluruh kebutuhan keuangan anda disimpan dalam database kami, anda bisa melihat report dan statistik jingan ingin!",
+                          style: TypographyApp.desc,
+                        ),
                         Gap.h24,
                         AddActionTextField(
                           controller: nameAction,
@@ -59,15 +59,17 @@ class AddcontentView extends GetView<AddcontentController> {
                             decoration: InputDecoration(
                               // labelText: "Jenis Pengeluaran",
                               border: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(10)),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
                             ),
                             value: controller.selectedExpense.value,
-                            items: controller.expenses.map((String expense) {
-                              return DropdownMenuItem<String>(
-                                value: expense,
-                                child: Text(expense),
-                              );
-                            }).toList(),
+                            items:
+                                controller.expenses.map((String expense) {
+                                  return DropdownMenuItem<String>(
+                                    value: expense,
+                                    child: Text(expense),
+                                  );
+                                }).toList(),
                             onChanged: (String? newValue) {
                               if (newValue != null) {
                                 controller.setSelectedExpense(newValue);
@@ -78,26 +80,31 @@ class AddcontentView extends GetView<AddcontentController> {
                         Gap.h12,
                         Text("Tanggal"),
                         Gap.h8,
-                        Obx(() => GestureDetector(
-                              onTap: () => _showDatePicker(context, controller),
-                              child: Container(
-                                  padding: EdgeInsets.all(10),
-                                  decoration: BoxDecoration(
-                                      border: Border.all(color: Colors.grey),
-                                      borderRadius: BorderRadius.circular(6)),
-                                  child: Row(
-                                    children: [
-                                      Expanded(
-                                        child: Text(
-                                          controller.selectedDate
-                                              .value, // Mengambil tanggal yang dipilih dari controller
-                                          style: TextStyle(fontSize: 18),
-                                        ),
-                                      ),
-                                      Icon(Icons.calendar_month)
-                                    ],
-                                  )),
-                            )),
+                        Obx(
+                          () => GestureDetector(
+                            onTap: () => _showDatePicker(context, controller),
+                            child: Container(
+                              padding: EdgeInsets.all(10),
+                              decoration: BoxDecoration(
+                                border: Border.all(color: Colors.grey),
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Text(
+                                      controller
+                                          .selectedDate
+                                          .value, // Mengambil tanggal yang dipilih dari controller
+                                      style: TextStyle(fontSize: 18),
+                                    ),
+                                  ),
+                                  Icon(Icons.calendar_month),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -129,11 +136,13 @@ class AddcontentView extends GetView<AddcontentController> {
                                   child: Container(
                                     padding: EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      border:
-                                          Border.all(color: ColorApp.mainColor),
-                                      color: controller.priority.value == 1
-                                          ? ColorApp.mainColor
-                                          : Colors.white,
+                                      border: Border.all(
+                                        color: ColorApp.mainColor,
+                                      ),
+                                      color:
+                                          controller.priority.value == 1
+                                              ? ColorApp.mainColor
+                                              : Colors.white,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Row(
@@ -161,11 +170,13 @@ class AddcontentView extends GetView<AddcontentController> {
                                     width: SizeApp.customWidth(120),
                                     padding: EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      border:
-                                          Border.all(color: ColorApp.mainColor),
-                                      color: controller.priority.value == 2
-                                          ? ColorApp.mainColor
-                                          : Colors.white,
+                                      border: Border.all(
+                                        color: ColorApp.mainColor,
+                                      ),
+                                      color:
+                                          controller.priority.value == 2
+                                              ? ColorApp.mainColor
+                                              : Colors.white,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Center(
@@ -173,9 +184,10 @@ class AddcontentView extends GetView<AddcontentController> {
                                         "Tidak Urgent", // Mengambil prioritas yang dipilih dari controller
                                         style: TextStyle(
                                           fontSize: 18,
-                                          color: controller.priority.value == 2
-                                              ? ColorApp.white
-                                              : Colors.black,
+                                          color:
+                                              controller.priority.value == 2
+                                                  ? ColorApp.white
+                                                  : Colors.black,
                                         ),
                                       ),
                                     ),
@@ -188,38 +200,41 @@ class AddcontentView extends GetView<AddcontentController> {
                         Gap.h12,
                         Text("Pengeluaran"),
                         Gap.h8,
-                        Row(children: [
-                          Container(
-                            padding: EdgeInsets.all(12),
-                            decoration: BoxDecoration(
+                        Row(
+                          children: [
+                            Container(
+                              padding: EdgeInsets.all(12),
+                              decoration: BoxDecoration(
                                 border: Border.all(color: Colors.grey),
-                                borderRadius: BorderRadius.circular(6)),
-                            child: Row(
-                              children: [
-                                Image.asset(
-                                  'assets/icons/indo.png',
-                                  width: 30,
-                                ),
-                                Gap.w8,
-                                Text(
-                                  "Rp", // Mengambil prioritas yang dipilih dari controller
-                                  style: TextStyle(fontSize: 18),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Gap.w12,
-                          Expanded(
-                            child: TextField(
-                              keyboardType: TextInputType.number,
-                              controller: costController,
-                              decoration: InputDecoration(
-                                border: OutlineInputBorder(),
-                                // labelText: "Masukan nama",
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Row(
+                                children: [
+                                  Image.asset(
+                                    'assets/icons/indo.png',
+                                    width: 30,
+                                  ),
+                                  Gap.w8,
+                                  Text(
+                                    "Rp", // Mengambil prioritas yang dipilih dari controller
+                                    style: TextStyle(fontSize: 18),
+                                  ),
+                                ],
                               ),
                             ),
-                          ),
-                        ]),
+                            Gap.w12,
+                            Expanded(
+                              child: TextField(
+                                keyboardType: TextInputType.number,
+                                controller: costController,
+                                decoration: InputDecoration(
+                                  border: OutlineInputBorder(),
+                                  // labelText: "Masukan nama",
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                         Gap.h8,
                         Text(
                           "Saat ini, sistem hanya mendeteksi mata uang rupiah ya Momates!",
@@ -286,10 +301,12 @@ class AddcontentView extends GetView<AddcontentController> {
                                   );
                                 },
                               );
+
                               controller.updateCost(costController.text);
+                              // Reset semua text controller
                             }
                           },
-                        )
+                        ),
                       ],
                     ),
                   ),
@@ -303,10 +320,15 @@ class AddcontentView extends GetView<AddcontentController> {
   }
 
   void _showDatePicker(
-      BuildContext context, AddcontentController dateController) async {
+    BuildContext context,
+    AddcontentController dateController,
+  ) async {
     DateTime now = DateTime.now(); // Ambil tanggal sekarang
-    DateTime lastDate = DateTime(now.year + 1, now.month,
-        now.day); // Tentukan batas tanggal terakhir setahun setelah sekarang
+    DateTime lastDate = DateTime(
+      now.year + 1,
+      now.month,
+      now.day,
+    ); // Tentukan batas tanggal terakhir setahun setelah sekarang
 
     DateTime firstDate = DateTime(now.year - 5, now.month, now.day);
     DateTime? selectedDate = await showDatePicker(
@@ -342,14 +364,10 @@ class InformationDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     return AlertDialog(
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       shadowColor: Colors.white,
       title: Text(nameAction, style: TypographyApp.mdblack),
-      content: Text(
-        desc,
-      ),
+      content: Text(desc),
       actions: [
         ElevatedButton(
           style: ElevatedButton.styleFrom(
@@ -359,8 +377,10 @@ class InformationDialog extends StatelessWidget {
             backgroundColor: ColorApp.mainColor,
           ),
           onPressed: onTap,
-          child: Text(title,
-              style: TypographyApp.mdblack.copyWith(color: Colors.white)),
+          child: Text(
+            title,
+            style: TypographyApp.mdblack.copyWith(color: Colors.white),
+          ),
         ),
       ],
     );
@@ -389,12 +409,13 @@ class AddActionTextField extends StatelessWidget {
             controller: controller,
             decoration: InputDecoration(
               contentPadding: EdgeInsets.all(16),
-              border:
-                  OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(10),
+              ),
               hintText: title,
               // labelText: "Masukan nama",
             ),
-          )
+          ),
         ],
       ),
     );

@@ -29,6 +29,12 @@ class SignupController extends GetxController {
         "cost": 0,
         "limit": limit,
       });
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(credential.user!.uid)
+          .collection('detailCost')
+          .doc('fixedDocument') // Menggunakan doc() untuk menentukan ID dokumen
+          .set({'barang': 0, 'pendidikan': 0, 'travel': 0});
 
       Get.offAllNamed('/signin');
     } on FirebaseAuthException catch (e) {

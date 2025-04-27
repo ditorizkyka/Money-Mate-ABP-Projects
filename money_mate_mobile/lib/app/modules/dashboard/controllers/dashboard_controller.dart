@@ -25,13 +25,13 @@ class DashboardController extends GetxController {
     user.uid = userFirebase.uid;
   }
 
-  Future<void> detailCostInit() async {
-    String userId = FirebaseAuth.instance.currentUser!.uid;
-    await FirebaseFirestore.instance
-        .collection('users')
-        .doc(userId)
-        .collection('detailCost')
-        .doc('fixedDocument') // Menggunakan doc() untuk menentukan ID dokumen
-        .set({'barang': 0, 'pendidikan': 0, 'travel': 0});
-  }
+  // Future<void> detailCostInit() async {
+  //   String userId = FirebaseAuth.instance.currentUser!.uid;
+  //   await FirebaseFirestore.instance
+  //       .collection('users')
+  //       .doc(userId)
+  //       .collection('detailCost')
+  //       .doc('fixedDocument') // Menggunakan doc() untuk menentukan ID dokumen
+  //       .set({'barang': 0, 'pendidikan': 0, 'travel': 0});
+  // }
 }
