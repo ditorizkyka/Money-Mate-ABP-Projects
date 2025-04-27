@@ -28,7 +28,9 @@ class EditprofileController extends GetxController {
     try {
       User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
+        final uid = user.uid;
         await user.delete();
+        await FirebaseFirestore.instance.collection('users').doc(uid).delete();
 
         var box = await Hive.openBox('userBox');
         box.put('isLoggedIn', false);

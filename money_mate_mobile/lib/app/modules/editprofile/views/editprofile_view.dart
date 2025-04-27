@@ -63,7 +63,7 @@ class EditprofileView extends GetView<EditprofileController> {
                   return Column(
                     children: [
                       Text(
-                        snapshot.data!['name'],
+                        snapshot.data?['name'] ?? '',
                         style: TypographyApp.mdblack.copyWith(fontSize: 25),
                       ),
                       Gap.h4,

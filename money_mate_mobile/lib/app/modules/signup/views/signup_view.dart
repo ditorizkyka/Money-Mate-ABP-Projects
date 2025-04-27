@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:money_mate_mobile/app/services/authServices.dart';
 import 'package:money_mate_mobile/app/widget/authfield.dart';
 import 'package:money_mate_mobile/app/widget/buttonApp.dart';
 import 'package:money_mate_mobile/constant/constant.dart';
@@ -16,6 +15,8 @@ class SignupView extends GetView<SignupController> {
     final TextEditingController passwordController = TextEditingController();
     final TextEditingController nameController = TextEditingController();
     final TextEditingController limitController = TextEditingController();
+    Get.lazyPut(() => SignupController());
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Center(
@@ -70,7 +71,7 @@ class SignupView extends GetView<SignupController> {
                 ButtonApp(
                   action: "Sign-Up",
                   onTap: () async {
-                    await Authservices().signup(
+                    await controller.signup(
                       fullname: nameController.text,
                       email: emailController.text,
                       password: passwordController.text,
@@ -79,6 +80,15 @@ class SignupView extends GetView<SignupController> {
                               ? 0
                               : int.parse(limitController.text),
                     );
+                    // await Authservices().signup(
+                    //   fullname: nameController.text,
+                    //   email: emailController.text,
+                    //   password: passwordController.text,
+                    //   limit:
+                    //       limitController.text == ""
+                    //           ? 0
+                    //           : int.parse(limitController.text),
+                    // );
                   },
                 ),
                 Gap.h12,
