@@ -5,9 +5,21 @@ import 'package:hive_flutter/adapters.dart';
 
 class EditprofileController extends GetxController {
   Future<void> updateUser(String userId, String newName, int limit) async {
-    if (newName.isNotEmpty) {
+    if (newName.isEmpty && limit >= 0) {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'limit': limit,
+      });
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'limit': limit,
+      });
+    } else if (limit < 0 && newName.isNotEmpty) {
       await FirebaseFirestore.instance.collection('users').doc(userId).update({
         'name': newName,
+      });
+    } else {
+      await FirebaseFirestore.instance.collection('users').doc(userId).update({
+        'name': newName,
+        'limit': limit,
       });
     }
   }
