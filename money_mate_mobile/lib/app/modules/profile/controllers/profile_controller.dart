@@ -16,4 +16,16 @@ class ProfileController extends GetxController {
 
     print(name.value);
   }
+
+  Future<void> signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+      print("User berhasil sign out");
+      var box = await Hive.openBox('userBox');
+      box.put('isLoggedIn', false);
+      Get.offAllNamed('/signin');
+    } catch (e) {
+      print("Error saat sign out: $e");
+    }
+  }
 }

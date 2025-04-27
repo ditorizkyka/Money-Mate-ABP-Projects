@@ -3,9 +3,6 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:money_mate_mobile/app/modules/dashboard/controllers/dashboard_controller.dart';
-import 'package:money_mate_mobile/app/services/authServices.dart';
-import 'package:money_mate_mobile/app/widget/dialog.dart';
 import 'package:money_mate_mobile/constant/constant.dart';
 
 import '../controllers/profile_controller.dart';
@@ -133,7 +130,7 @@ class ProfileView extends GetView<ProfileController> {
                                   ),
                                   onPressed: () async {
                                     Navigator.pop(context);
-                                    await Authservices().signOut();
+                                    await controller.signOut();
                                   },
                                   child: Text(
                                     "Confirm",

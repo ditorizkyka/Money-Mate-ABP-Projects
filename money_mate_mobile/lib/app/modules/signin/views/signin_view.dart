@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import 'package:get/get.dart';
-import 'package:money_mate_mobile/app/services/authServices.dart';
 import 'package:money_mate_mobile/app/widget/authfield.dart';
 import 'package:money_mate_mobile/app/widget/buttonApp.dart';
 import 'package:money_mate_mobile/constant/constant.dart';
