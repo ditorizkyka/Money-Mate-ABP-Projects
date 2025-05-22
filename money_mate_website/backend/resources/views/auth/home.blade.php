@@ -35,7 +35,6 @@
 </div>
 
 <h2>Activities Table - User ID {{ $user->userID }}</h2>
-
 <table>
   <thead>
     <tr>
@@ -51,24 +50,24 @@
     </tr>
   </thead>
   <tbody>
-    @forelse($activities as $activity)
-      <tr>
-        <td>{{ $activity->userID }}</td>
-        <td>{{ $activity->activitiesName }}</td>
-        <td>{{ $activity->activitiesType }}</td>
-        <td>{{ $activity->activitiesSpent }}</td>
-        <td>{{ $activity->date }}</td>
-        <td>{{ $activity->deskripsi }}</td>
-        <td>{{ $activity->priority }}</td>
-        <td>{{ $activity->created_at }}</td>
-        <td>{{ $activity->updated_at }}</td>
-      </tr>
-    @empty
-      <tr>
-        <td colspan="9" style="text-align:center;">Tidak ada aktivitas ditemukan.</td>
-      </tr>
-    @endforelse
-  </tbody>
+  @forelse($activities as $activity)
+    <tr>
+      <td>{{ $activity['userID'] }}</td>
+      <td>{{ $activity['activitiesName'] }}</td>
+      <td>{{ $activity['activitiesType'] }}</td>
+      <td>{{ $activity['activitiesSpent'] }}</td>
+      <td>{{ $activity['date'] }}</td>
+      <td>{{ $activity['deskripsi'] }}</td>
+      <td>{{ $activity['priority'] }}</td>
+      <td>{{ $activity['created_at'] }}</td>
+      <td>{{ $activity['updated_at'] }}</td>
+    </tr>
+  @empty
+    <tr>
+      <td colspan="9" style="text-align:center;">Tidak ada aktivitas ditemukan.</td>
+    </tr>
+  @endforelse
+</tbody>
 </table>
 
 </body>
