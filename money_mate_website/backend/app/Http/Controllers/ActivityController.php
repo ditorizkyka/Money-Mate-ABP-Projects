@@ -10,9 +10,19 @@ class ActivityController extends Controller
     // GET /api/activities — ambil semua data
     public function index()
     {
-        return "halo";
-        // return response()->json(Activity::all(), 200);
+        // return "halo";
+        return response()->json(Activity::all(), 200);
     }
+
+    public static function filter()
+    {
+        return Activity::where('userID', auth()->user()->userID)
+            ->get()
+            ->map->getAttributes()
+            ->toArray();
+    }
+
+    
 
     // GET /api/activities/{id} — ambil satu data
     public function show($id)

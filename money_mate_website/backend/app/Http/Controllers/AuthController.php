@@ -79,10 +79,10 @@ class AuthController extends Controller
         
         $user = Auth::user();
         
-        $activities = ActivityController::index();
-        dd($activities);
+        $activities = ActivityController::filter();
+        // dd($activities);
         // $user->activities = $activities;
-        return view('auth.home', compact('user'));
+        return view('auth.home', compact('user', 'activities'));
     }
 
     public function logout()
