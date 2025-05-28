@@ -12,13 +12,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
-            $table->id('userID');
+            $table->id();
+            $table->string('firebase_uid')->unique()->nullable(); // UID dari Firebase
+            $table->string('name');
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('name');
-            $table->string('password');
-            $table->integer('limit')->nullable();       
-            $table->integer('totalSpent')->default(0);  
+            $table->string('password')->nullable(); // Bisa nullable jika login hanya via Firebase
+            $table->decimal('limit', 12, 2)->default(0); // Contoh: limit saldo/pembelanjaan
+            $table->decimal('total_spent', 12, 2)->default(0); // Total yang sudah dihabiskan
             $table->rememberToken();
             $table->timestamps();
         });
