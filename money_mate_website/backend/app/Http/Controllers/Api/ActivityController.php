@@ -4,15 +4,19 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+
 use Carbon\Carbon;
+
 //import model Post
 use App\Models\Activity;
 
 //import resource activityResource
 use App\Http\Resources\ActivityResource;
 
+
 //import facade Validator
 use Illuminate\Support\Facades\Validator;
+
 class ActivityController extends Controller
 {
     /**
@@ -28,6 +32,7 @@ class ActivityController extends Controller
         //return collection of posts as a resource
         return new ActivityResource(true, 'List Data Activity', $activities);
     }
+
 
     /**
      * show
@@ -56,21 +61,45 @@ class ActivityController extends Controller
         'date'        => 'nullable|date', // tetap validasi tanggal
     ]);
 
+
+    public function store(Request $request)
+{
+    // Define validation rules
+    $validator = Validator::make($request->all(), [
+        'name'        => 'required|string|max:255',
+        'description' => 'nullable|string',
+        'type'        => 'required|string|in:general,event,task',
+        'priority'    => 'required|string|in:low,medium,high',
+        'spent'       => 'required|numeric', // asumsi disimpan sebagai angka (rupiah)
+        'date'        => 'nullable|date',
+    ]);
+
+    // Check if validation fails
     if ($validator->fails()) {
         return response()->json($validator->errors(), 422);
     }
-
     $date = $request->date ? Carbon::parse($request->date)->format('Y-m-d H:i:s') : null;
 
     $activity = Activity::create([
         'firebase_uid'     => $request->firebase_uid, // Firebase UID
+
+    // Create activity
+    $activity = Activity::create([
+
         'name'        => $request->name,
         'description' => $request->description,
         'type'        => $request->type,
         'priority'    => $request->priority,
         'spent'       => $request->spent,
+
         'date'        => $date,
     ]);
+
+=======
+        'date'        => $request->date,
+    ]);
+
+    // Return response
 
     return response()->json([
         'success' => true,
@@ -79,6 +108,5 @@ class ActivityController extends Controller
     ]);
 }
 
-    
 
 }

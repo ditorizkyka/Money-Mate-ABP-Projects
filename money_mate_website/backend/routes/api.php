@@ -8,7 +8,6 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware(Authenticate::using('sanctum'));
 
-//posts
 Route::apiResource('/activities', App\Http\Controllers\Api\ActivityController::class);
 Route::apiResource('/user', App\Http\Controllers\Api\UserController::class);
 
@@ -22,3 +21,4 @@ Route::delete('/user/{firebase_uid}', [App\Http\Controllers\Api\UserController::
 
 // Route tambahan untuk verifikasi
 Route::get('/user/{firebase_uid}/verify', [App\Http\Controllers\Api\UserController::class, 'verifyUpdate']);
+

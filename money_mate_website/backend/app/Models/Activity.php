@@ -18,5 +18,4 @@ class Activity extends Model
         'end_date',
         // jika ada
     ];
-
 }
