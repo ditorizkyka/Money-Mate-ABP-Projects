@@ -11,16 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('activities', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('description')->nullable();
-            $table->string('type');// e.g., 'general', 'event', 'task'
-            $table->string('priority');
-            $table-> string('spent');
-            $table->date('date')->nullable();
-            $table->timestamps();
-        });
+       Schema::create('activities', function (Blueprint $table) {
+        $table->id();
+        $table->string('firebase_uid'); // Firebase UID for user identification
+        $table->string('name');
+        $table->string('description')->nullable();
+        $table->string('type'); // e.g., 'general', 'event', 'task'
+        $table->string('priority');
+        $table->integer('spent')->default(0);
+        $table->date('date')->nullable();
+        $table->timestamps();
+      });
     }
 
     /**

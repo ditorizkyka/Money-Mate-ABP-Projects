@@ -1,17 +1,17 @@
 // ==================== CONTROLLER ====================
+import 'package:dio/dio.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/services.dart';
+import 'package:frontend/app/shared/constanta.dart';
 import 'package:frontend/constant/constant.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
-
-
 // Model untuk expense category
 class ExpenseCategory {
   final String id;
   final String name;
   final IconData icon;
   final Color color;
-
 
   ExpenseCategory({
     required this.id,
@@ -21,14 +21,12 @@ class ExpenseCategory {
   });
 }
 
-
 // Model untuk priority level
 class PriorityLevel {
   final String id;
   final String name;
   final Color color;
   final IconData icon;
-
 
   PriorityLevel({
     required this.id,
@@ -38,7 +36,6 @@ class PriorityLevel {
   });
 }
 
-
 class AddActivitiesController extends GetxController {
   // Form controllers
   final titleController = TextEditingController();
@@ -46,13 +43,83 @@ class AddActivitiesController extends GetxController {
   final descriptionController = TextEditingController();
   final formKey = GlobalKey<FormState>();
 
-
   // Observable variables
   final selectedCategory = Rx<ExpenseCategory?>(null);
   final selectedPriority = Rx<PriorityLevel?>(null);
   final selectedDate = DateTime.now().obs;
   final isLoading = false.obs;
 
+  Future<Map<String, dynamic>?> saveActivitiesToBackend({
+    required String uid,
+    required String nameActivity,
+    required String description,
+    required String type,
+    required String priority,
+    required double spent,
+    required String date,
+    required int limit,
+  }) async {
+    try {
+      final response = await dio.post(
+        'http://localhost:8000/api/activities', // endpoint Laravel Anda
+        data: {
+          'firebase_uid': uid,
+          'name': nameActivity,
+          'description': description,
+          'type': type,
+          'priority': priority,
+          'spent': spent,
+          'date': date,
+        },
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+            // Jika menggunakan authentication token
+            // 'Authorization': 'Bearer YOUR_TOKEN_HERE',
+          },
+        ),
+      );
+
+      print(response.data); // Debugging response
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
+        return response.data;
+      } else {
+        throw Exception('Failed to save user to backend');
+      }
+    } on DioException catch (e) {
+      // Handle Dio specific errors
+      String errorMessage = "Gagal menyimpan data ke server";
+
+      if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = "Koneksi timeout";
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = "Server tidak merespon";
+      } else if (e.response != null) {
+        // Server responded with error
+        final statusCode = e.response!.statusCode;
+        final responseData = e.response!.data;
+
+        if (statusCode == 422) {
+          // Validation error
+          errorMessage =
+              "Data tidak valid: ${responseData['message'] ?? 'Periksa data Anda'}";
+        } else if (statusCode == 500) {
+          errorMessage = "Server error";
+        } else {
+          errorMessage =
+              "Error: ${responseData['message'] ?? 'Terjadi kesalahan'}";
+        }
+      }
+
+      Get.snackbar("Error Backend", errorMessage);
+      throw Exception(errorMessage);
+    } catch (e) {
+      Get.snackbar("Error", "Gagal menyimpan data: ${e.toString()}");
+      throw Exception(e.toString());
+    }
+  }
 
   // Data options - Updated according to requirements
   final List<ExpenseCategory> expenseCategories = [
@@ -82,7 +149,6 @@ class AddActivitiesController extends GetxController {
     ),
   ];
 
-
   final List<PriorityLevel> priorityLevels = [
     PriorityLevel(
       id: 'urgent',
@@ -91,13 +157,12 @@ class AddActivitiesController extends GetxController {
       icon: Icons.priority_high,
     ),
     PriorityLevel(
-      id: 'not_urgent',
+      id: 'noturgent',
       name: 'Not Urgent',
       color: Colors.green,
       icon: Icons.low_priority,
     ),
   ];
-
 
   @override
   void onInit() {
@@ -107,7 +172,6 @@ class AddActivitiesController extends GetxController {
     selectedPriority.value = priorityLevels[1]; // Not urgent
   }
 
-
   @override
   void onClose() {
     titleController.dispose();
@@ -116,22 +180,18 @@ class AddActivitiesController extends GetxController {
     super.onClose();
   }
 
-
   // Methods untuk mengubah selection
   void selectCategory(ExpenseCategory category) {
     selectedCategory.value = category;
   }
 
-
   void selectPriority(PriorityLevel priority) {
     selectedPriority.value = priority;
   }
 
-
   void selectDate(DateTime date) {
     selectedDate.value = date;
   }
-
 
   // Method untuk submit form
   Future<void> submitForm() async {
@@ -139,15 +199,8 @@ class AddActivitiesController extends GetxController {
       return;
     }
 
-
     try {
       isLoading.value = true;
-
-
-      // Simulate API call
-      await Future.delayed(Duration(seconds: 1));
-
-
       final formData = {
         'title': titleController.text,
         'category': selectedCategory.value?.id,
@@ -155,13 +208,22 @@ class AddActivitiesController extends GetxController {
         'date': selectedDate.value.toIso8601String(),
         'priority': selectedPriority.value?.id,
         'description': descriptionController.text,
-        'createdAt': DateTime.now().toIso8601String(),
+        'createdAt': DateTime.now(),
       };
-
 
       // Print for debugging
       print('Form submitted: $formData');
-
+      // Simulate API call
+      await saveActivitiesToBackend(
+        uid: FirebaseAuth.instance.currentUser?.uid ?? 'x',
+        nameActivity: titleController.text,
+        description: descriptionController.text,
+        type: selectedCategory.value?.id ?? 'other',
+        priority: selectedPriority.value?.id ?? 'noturgent',
+        spent: double.parse(amountController.text),
+        date: selectedDate.value.toIso8601String(),
+        limit: 0,
+      );
 
       // Show success message
       Get.snackbar(
@@ -174,10 +236,8 @@ class AddActivitiesController extends GetxController {
         duration: Duration(seconds: 3),
       );
 
-
       // Clear form
       clearForm();
-
 
       // Close page after short delay
       Future.delayed(Duration(seconds: 1), () {
@@ -197,7 +257,6 @@ class AddActivitiesController extends GetxController {
     }
   }
 
-
   // Method untuk clear form
   void clearForm() {
     titleController.clear();
@@ -208,19 +267,16 @@ class AddActivitiesController extends GetxController {
     selectedDate.value = DateTime.now();
   }
 
-
   // Method untuk format currency
   String formatCurrency(double amount) {
     return 'Rp ${amount.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]}.')}';
   }
 }
 
-
 class AddActivities extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(AddActivitiesController());
-
 
     return Scaffold(
       backgroundColor: Color(0xFFF5F7FA),
@@ -298,7 +354,6 @@ class AddActivities extends StatelessWidget {
               ),
               SizedBox(height: 24),
 
-
               // Form Fields
               Container(
                 padding: EdgeInsets.all(24),
@@ -330,7 +385,6 @@ class AddActivities extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
 
-
                     // Expense Category (4 types only)
                     _buildLabel('Kategori'),
                     Obx(
@@ -341,7 +395,6 @@ class AddActivities extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 20),
-
 
                     // Amount
                     _buildLabel('Amount Pengeluaran (Rp)'),
@@ -362,12 +415,10 @@ class AddActivities extends StatelessWidget {
                     ),
                     SizedBox(height: 20),
 
-
                     // Date
                     _buildLabel('Tanggal'),
                     Obx(() => _buildDatePicker(context, controller)),
                     SizedBox(height: 20),
-
 
                     // Priority Level (2 types only)
                     _buildLabel('Priority Level'),
@@ -379,7 +430,6 @@ class AddActivities extends StatelessWidget {
                       ),
                     ),
                     SizedBox(height: 20),
-
 
                     // Description
                     _buildLabel('Deskripsi'),
@@ -395,7 +445,6 @@ class AddActivities extends StatelessWidget {
                       },
                     ),
                     SizedBox(height: 32),
-
 
                     // Submit Button
                     Obx(
@@ -447,7 +496,6 @@ class AddActivities extends StatelessWidget {
                     ),
                     SizedBox(height: 12),
 
-
                     // Cancel Button
                     SizedBox(
                       width: double.infinity,
@@ -480,7 +528,6 @@ class AddActivities extends StatelessWidget {
     );
   }
 
-
   Widget _buildLabel(String text) {
     return Padding(
       padding: EdgeInsets.only(bottom: 8),
@@ -494,7 +541,6 @@ class AddActivities extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildTextField({
     required TextEditingController controller,
@@ -539,7 +585,6 @@ class AddActivities extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildCategoryDropdown({
     required ExpenseCategory value,
@@ -595,7 +640,6 @@ class AddActivities extends StatelessWidget {
     );
   }
 
-
   Widget _buildPriorityDropdown({
     required PriorityLevel value,
     required List<PriorityLevel> items,
@@ -641,7 +685,6 @@ class AddActivities extends StatelessWidget {
       ),
     );
   }
-
 
   Widget _buildDatePicker(
     BuildContext context,
