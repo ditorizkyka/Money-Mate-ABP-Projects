@@ -105,12 +105,12 @@ class SigninView extends GetView<SigninController> {
                       ButtonApp(
                         action: "Sign In",
                         onTap: () {
-                          // controller.signin(
-                          //   email: emailController.text.trim(),
-                          //   password: passwordController.text.trim(),
-                          // );
+                          controller.signin(
+                            email: emailController.text.trim(),
+                            password: passwordController.text.trim(),
+                          );
                           // print("sukses");
-                          Get.offAllNamed('/dashboard');
+                          // Get.offAllNamed('/dashboard');
                         },
                       ),
                       Gap.h8, // Reduced from h12

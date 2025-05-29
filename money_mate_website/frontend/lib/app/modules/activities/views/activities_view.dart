@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/modules/dashboard/views/dashboard_view.dart';
-import 'package:frontend/app/widget/activitiesCard.dart';
 import 'package:frontend/app/widget/activitiesItem.dart';
 import 'package:frontend/app/widget/categoryCard.dart';
 import 'package:frontend/constant/constant.dart';
-
 import 'package:get/get.dart';
-
 import '../controllers/activities_controller.dart';
 
 class ActivitiesView extends GetView<ActivitiesController> {
@@ -117,19 +114,47 @@ class ActivitiesView extends GetView<ActivitiesController> {
                                     // LOOPING
                                     SizedBox(
                                       height: 500,
-                                      child: ListView.builder(
-                                        itemBuilder: (context, index) =>
-                                            ActivitiesItem(
-                                              title: 'Investment Wallet',
-                                              subtitle: 'Received',
-                                              amount: '+ ₹ 48 250',
-                                              date: '2025-04-28',
-                                              bgColor: Colors.red[50]!,
-                                              iconColor: Colors.red,
-                                              icon: Icons.arrow_downward,
-                                            ),
-                                        itemCount: 10,
-                                      ),
+                                      child: Obx(() {
+                                        if (controller.isLoading.value) {
+                                          return const Center(
+                                            child: CircularProgressIndicator(),
+                                          );
+                                        }
+
+                                        if (controller.activities.isEmpty) {
+                                          return const Center(
+                                            child: Text("No activities found"),
+                                          );
+                                        }
+
+                                        return RefreshIndicator(
+                                          onRefresh:
+                                              () =>
+                                                  controller
+                                                      .refreshActivities(),
+                                          child: ListView.builder(
+                                            itemCount:
+                                                controller.activities.length,
+                                            itemBuilder: (context, index) {
+                                              final activity =
+                                                  controller.activities[index];
+                                              return ActivitiesItem(
+                                                title: activity.name,
+                                                subtitle: activity.description,
+                                                amount:
+                                                    '+ ₹ ${activity.spent.toStringAsFixed(2)}',
+                                                date:
+                                                    activity.date
+                                                        .toString()
+                                                        .split(' ')[0],
+                                                bgColor: Colors.blue[50]!,
+                                                iconColor: Colors.blue,
+                                                icon: Icons.arrow_upward,
+                                              );
+                                            },
+                                          ),
+                                        );
+                                      }),
                                     ),
 
                                     // Transaction Items

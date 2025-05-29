@@ -1,3 +1,5 @@
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/app/modules/dashboard/views/dashboard_view.dart';
 import 'package:frontend/constant/constant.dart';
@@ -36,69 +38,86 @@ class ProfileView extends GetView<ProfileController> {
                       ),
                     ],
                   ),
-                  child: Column(
-                    children: [
-                      // Profile Image
-                      Stack(
+                  child: StreamBuilder(
+                    stream: FirebaseAuth.instance.authStateChanges(),
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return Center(child: CircularProgressIndicator());
+                      }
+                      if (snapshot.hasError) {
+                        return Center(child: Text('Error: ${snapshot.error}'));
+                      }
+                      if (!snapshot.hasData || snapshot.data == null) {
+                        return Center(child: Text('Anda belum masuk'));
+                      }
+
+                      // User is logged in
+                      final user = snapshot.data as User;
+                      controller.userName.value =
+                          user.displayName ?? 'Pengguna';
+                      controller.userEmail.value =
+                          user.email ?? ' Tidak ada email';
+                      return Column(
                         children: [
-                          CircleAvatar(
-                            radius: 50,
-                            backgroundImage: NetworkImage(
-                              'https://via.placeholder.com/150',
+                          // Profile Image
+                          Stack(
+                            children: [
+                              CircleAvatar(
+                                radius: 50,
+                                backgroundImage: NetworkImage(
+                                  'https://via.placeholder.com/150',
+                                ),
+                              ),
+                              Positioned(
+                                bottom: 0,
+                                right: 0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: ColorApp.mainColor,
+                                    shape: BoxShape.circle,
+                                  ),
+                                  child: IconButton(
+                                    icon: Icon(
+                                      Icons.camera_alt,
+                                      color: Colors.white,
+                                      size: 20,
+                                    ),
+                                    onPressed: () {
+                                      controller.changeProfileImage();
+                                    },
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          Gap.h16,
+
+                          // User Name
+                          Text(
+                            controller.userName.value,
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
                             ),
                           ),
-                          Positioned(
-                            bottom: 0,
-                            right: 0,
-                            child: Container(
-                              decoration: BoxDecoration(
-                                color: ColorApp.mainColor,
-                                shape: BoxShape.circle,
-                              ),
-                              child: IconButton(
-                                icon: Icon(
-                                  Icons.camera_alt,
-                                  color: Colors.white,
-                                  size: 20,
-                                ),
-                                onPressed: () {
-                                  controller.changeProfileImage();
-                                },
-                              ),
+
+                          Gap.h8,
+
+                          // User Email
+                          Text(
+                            controller.userEmail.value,
+                            style: TextStyle(
+                              fontSize: 16,
+                              color: Colors.grey[600],
                             ),
                           ),
                         ],
-                      ),
-                      Gap.h16,
-
-                      // User Name
-                      Obx(
-                        () => Text(
-                          controller.userName.value,
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ),
-                      Gap.h8,
-
-                      // User Email
-                      Obx(
-                        () => Text(
-                          controller.userEmail.value,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.grey[600],
-                          ),
-                        ),
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
               ),
-
               // Menu Options
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 30),

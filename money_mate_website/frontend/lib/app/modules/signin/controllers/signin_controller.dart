@@ -15,6 +15,7 @@ class SigninController extends GetxController {
 
       // Navigasi ke halaman setelah login berhasil (ubah sesuai kebutuhan)
       Get.snackbar('Login Berhasil', "Login berhasil, selamat datang!");
+      Get.offAllNamed('/dashboard');
     } on FirebaseAuthException catch (e) {
       String message = '';
       switch (e.code) {

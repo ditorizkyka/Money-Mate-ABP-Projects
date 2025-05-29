@@ -1,12 +1,21 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:frontend/app/modules/activities/controllers/activities_controller.dart';
 import 'package:frontend/app/widget/activitiesItem.dart';
 import 'package:frontend/constant/constant.dart';
+import 'package:get/get.dart';
 
 class ActivitiesCard extends StatelessWidget {
   const ActivitiesCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Get the controller instance
+    Get.lazyPut(() => ActivitiesController());
+    final ActivitiesController controller = Get.find<ActivitiesController>();
+    controller.getDashboardActivities(
+      FirebaseAuth.instance.currentUser?.uid ?? '',
+    );
     return Container(
       // height: SizeApp.customHeight(370),
       padding: EdgeInsets.all(20),
@@ -44,47 +53,43 @@ class ActivitiesCard extends StatelessWidget {
                   ),
                 ],
               ),
-              Icon(Icons.arrow_outward, size: 20, color: Colors.grey[600]),
+              GestureDetector(
+                onTap: () => controller.refreshActivities(),
+                child: Icon(Icons.refresh, size: 20, color: Colors.grey[600]),
+              ),
             ],
           ),
           SizedBox(height: 15),
-          ActivitiesItem(
-            title: 'Investment Wallet',
-            subtitle: 'Received',
-            amount: '+ ₹ 48 250',
-            date: '2025-04-28',
-            bgColor: Colors.red[50]!,
-            iconColor: Colors.red,
-            icon: Icons.arrow_downward,
-          ),
+          SizedBox(
+            height: SizeApp.customHeight(260),
+            child: Obx(() {
+              if (controller.isLoading.value) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-          ActivitiesItem(
-            title: 'Investment Wallet',
-            subtitle: 'Received',
-            amount: '+ ₹ 48 250',
-            date: '2025-04-28',
-            bgColor: Colors.green[50]!,
-            iconColor: Colors.green,
-            icon: Icons.arrow_downward,
-          ),
+              if (controller.top4activities.isEmpty) {
+                return const Center(child: Text("No activities found"));
+              }
 
-          ActivitiesItem(
-            title: 'Investment Wallet',
-            subtitle: 'Received',
-            amount: '+ ₹ 48 250',
-            date: '2025-04-28',
-            bgColor: Colors.green[50]!,
-            iconColor: Colors.green,
-            icon: Icons.arrow_downward,
-          ),
-          ActivitiesItem(
-            title: 'Investment Wallet',
-            subtitle: 'Received',
-            amount: '+ ₹ 48 250',
-            date: '2025-04-28',
-            bgColor: Colors.green[50]!,
-            iconColor: Colors.green,
-            icon: Icons.arrow_downward,
+              return RefreshIndicator(
+                onRefresh: () => controller.refreshDashboardActivities(),
+                child: ListView.builder(
+                  itemCount: controller.top4activities.length,
+                  itemBuilder: (context, index) {
+                    final activity = controller.top4activities[index];
+                    return ActivitiesItem(
+                      title: activity.name,
+                      subtitle: activity.description,
+                      amount: '+ ₹ ${activity.spent.toStringAsFixed(2)}',
+                      date: activity.date.toString().split(' ')[0],
+                      bgColor: Colors.blue[50]!,
+                      iconColor: Colors.blue,
+                      icon: Icons.arrow_upward,
+                    );
+                  },
+                ),
+              );
+            }),
           ),
         ],
       ),
