@@ -1,17 +1,32 @@
 import 'dart:developer';
-
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:frontend/app/data/model/Activity.dart';
 import 'package:get/get.dart';
 
 class ActivitiesController extends GetxController {
-  final count = 0.obs;
   var activities = <Activity>[].obs;
   var top4activities = <Activity>[].obs;
   var isLoading = false.obs;
+  var totalSpent = 0.obs;
+  var top4HighSpentActivities = <Activity>[].obs;
 
-  // Dio instance
+  // Grouped activities by type
+  var activitiesByType = <String, List<Activity>>{}.obs;
+
+  // Total spent per type
+  var totalSpentByType =
+      <String, int>{'education': 0, 'travel': 0, 'item': 0, 'other': 0}.obs;
+
+  // Di dalam controller
+  var percentageByType =
+      <String, double>{
+        'education': 0.0,
+        'travel': 0.0,
+        'item': 0.0,
+        'other': 0.0,
+      }.obs;
+
   late Dio _dio;
 
   @override
@@ -19,12 +34,8 @@ class ActivitiesController extends GetxController {
     super.onInit();
     _initializeDio();
 
-    // Check if user is logged in before fetching
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
-      // Debug API response first (remove this after fixing)
-      // debugApiResponse(currentUser.uid);
-
       getActivityById(currentUser.uid);
     } else {
       Get.snackbar("Error", "User not logged in");
@@ -36,39 +47,11 @@ class ActivitiesController extends GetxController {
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
 
-    // Add interceptor for logging (optional)
     _dio.interceptors.add(
       LogInterceptor(requestBody: true, responseBody: true, error: true),
     );
   }
 
-  // Method untuk debug response format
-  Future<void> debugApiResponse(String uid) async {
-    try {
-      final response = await _dio.get(
-        'http://localhost:8000/api/activities',
-        queryParameters: {'firebase_uid': uid},
-      );
-
-      print("=== API DEBUG INFO ===");
-      print("Status Code: ${response.statusCode}");
-      print("Response Type: ${response.data.runtimeType}");
-      print("Response Data: ${response.data}");
-
-      if (response.data is Map) {
-        final map = response.data as Map<String, dynamic>;
-        print("Map Keys: ${map.keys.toList()}");
-        map.forEach((key, value) {
-          print("Key '$key': ${value.runtimeType} = $value");
-        });
-      }
-      print("=== END DEBUG INFO ===");
-    } catch (e) {
-      print("Debug error: $e");
-    }
-  }
-
-  // Method untuk get single activity (diperbaiki)
   Future<void> getActivityById(String activityId) async {
     try {
       isLoading.value = true;
@@ -83,9 +66,16 @@ class ActivitiesController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        activities.clear();
+        totalSpent.value = 0;
+
         for (var activity in response.data['data']) {
-          activities.add(Activity.fromJson(activity));
+          final newActivity = Activity.fromJson(activity);
+          activities.add(newActivity);
+          totalSpent.value += newActivity.spent;
         }
+
+        groupActivitiesByType(); // Pemanggilan metode pemisah dan perhitungan
         isLoading.value = false;
       } else {
         throw Exception("HTTP ${response.statusCode}: Failed to get activity");
@@ -98,7 +88,6 @@ class ActivitiesController extends GetxController {
     }
   }
 
-  // Method untuk refresh data
   Future<void> refreshActivities() async {
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
@@ -113,7 +102,6 @@ class ActivitiesController extends GetxController {
     }
   }
 
-  // Method untuk get single activity (diperbaiki)
   Future<void> getDashboardActivities(String activityId) async {
     try {
       isLoading.value = true;
@@ -128,15 +116,21 @@ class ActivitiesController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+        activities.clear();
+        totalSpent.value = 0;
+
         for (var activity in response.data['data']) {
-          activities.add(Activity.fromJson(activity));
+          final newActivity = Activity.fromJson(activity);
+          activities.add(newActivity);
+          totalSpent.value += newActivity.spent;
         }
-        // Get top 4 activities
+
         final sortedActivities = List<Activity>.from(activities);
-        sortedActivities.sort(
-          (a, b) => b.date.compareTo(a.date),
-        ); // urutkan terbaru ke terlama
+        sortedActivities.sort((a, b) => b.date.compareTo(a.date));
         top4activities.value = sortedActivities.take(4).toList();
+
+        getTop4HighSpentActivities(); // ← Tambahkan ini
+        groupActivitiesByType();
         isLoading.value = false;
       } else {
         throw Exception("HTTP ${response.statusCode}: Failed to get activity");
@@ -147,6 +141,54 @@ class ActivitiesController extends GetxController {
       log("Get activity error: $e");
       Get.snackbar("Error", "Failed to get activity: ${e.toString()}");
     }
+  }
+
+  // Metode untuk mengelompokkan activity dan menghitung total spent per type
+  void groupActivitiesByType() {
+    final Map<String, List<Activity>> grouped = {};
+    final Map<String, int> spentByType = {
+      'education': 0,
+      'travel': 0,
+      'item': 0,
+      'other': 0,
+    };
+
+    for (var activity in activities) {
+      final type = activity.type.toLowerCase();
+
+      if (!grouped.containsKey(type)) {
+        grouped[type] = [];
+      }
+      grouped[type]!.add(activity);
+
+      if (spentByType.containsKey(type)) {
+        spentByType[type] = spentByType[type]! + activity.spent;
+      } else {
+        spentByType[type] = activity.spent;
+      }
+    }
+
+    activitiesByType.value = grouped;
+    totalSpentByType.value = spentByType;
+
+    final int total = totalSpent.value;
+    final Map<String, double> tempPercentage = {};
+
+    spentByType.forEach((type, value) {
+      if (total > 0) {
+        tempPercentage[type] = (value / total) * 100;
+      } else {
+        tempPercentage[type] = 0.0;
+      }
+    });
+
+    percentageByType.value = tempPercentage;
+  }
+
+  void getTop4HighSpentActivities() {
+    final sorted = List<Activity>.from(activities);
+    sorted.sort((a, b) => b.spent.compareTo(a.spent)); // Descending
+    top4HighSpentActivities.value = sorted.take(4).toList();
   }
 
   @override

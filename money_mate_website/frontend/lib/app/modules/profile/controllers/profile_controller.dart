@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
@@ -75,20 +76,20 @@ class ProfileController extends GetxController {
   }
 
   // Logout function
-  void logout() {
+
+  Future<void> logout() async {
     Get.dialog(
       Center(child: CircularProgressIndicator()),
       barrierDismissible: false,
     );
-
-    // Simulate logout process
-    Future.delayed(Duration(seconds: 2), () {
-      Get.back(); // Close loading dialog
-
-      // TODO: Clear user session/token from storage
-      _clearUserSession();
-
+    try {
+      await FirebaseAuth.instance.signOut();
+      // var box = await Hive.openBox('userBox');
+      // box.put('isLoggedIn', false);
       // Navigate to login page
+
+      Get.back(); // Close loading dialog
+      _clearUserSession();
       Get.offAllNamed('/signin'); // Adjust route name as per your app
 
       Get.snackbar(
@@ -97,7 +98,9 @@ class ProfileController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
-    });
+    } catch (e) {
+      print("Error saat sign out: $e");
+    }
   }
 
   // Delete account function
