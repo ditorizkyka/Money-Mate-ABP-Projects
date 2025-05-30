@@ -95,7 +95,7 @@ class ActivitiesView extends GetView<ActivitiesController> {
                                               ),
                                             ),
                                             Text(
-                                              'Wallet & Portfolio Movements',
+                                              'Track your activities',
                                               style: TextStyle(
                                                 fontSize: 12,
                                                 color: Colors.grey[600],
@@ -142,14 +142,22 @@ class ActivitiesView extends GetView<ActivitiesController> {
                                                 title: activity.name,
                                                 subtitle: activity.description,
                                                 amount:
-                                                    '+ ₹ ${activity.spent.toStringAsFixed(2)}',
+
+                                                    '+ Rp${activity.spent.toStringAsFixed(2)}',
                                                 date:
                                                     activity.date
                                                         .toString()
                                                         .split(' ')[0],
-                                                bgColor: Colors.blue[50]!,
-                                                iconColor: Colors.blue,
-                                                icon: Icons.arrow_upward,
+
+                                                bgColor: _getBackgroundColor(
+                                                  activity.type,
+                                                ),
+                                                iconColor: _getIconColor(
+                                                  activity.type,
+                                                ),
+                                                icon: _getIconByType(
+                                                  activity.type,
+                                                ),
                                               );
                                             },
                                           ),
@@ -175,29 +183,58 @@ class ActivitiesView extends GetView<ActivitiesController> {
                           child: Column(
                             children: [
                               // Category Cards
-                              Categorycard(
-                                title: 'Education',
-                                amount: 1000000,
-                                color1: ColorApp.mainColor,
-                                color2: Color.fromARGB(255, 22, 78, 181),
-                                lastUpdateDate: "2025-26-05",
-                              ),
+                              Obx(() {
+                                final spent = controller.totalSpentByType;
+
+                                if (controller.isLoading.value) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                return Categorycard(
+                                  title: 'Education',
+                                  amount: spent['education'] ?? 0,
+                                  color1: ColorApp.mainColor,
+                                  color2: Color.fromARGB(255, 22, 78, 181),
+                                  lastUpdateDate: "2025-26-05",
+                                );
+                              }),
                               Gap.h20,
-                              Categorycard(
-                                title: 'Education',
-                                amount: 1000000,
-                                color1: Color(0xFFEC4899),
-                                color2: Color.fromARGB(255, 179, 55, 117),
-                                lastUpdateDate: "2025-26-05",
-                              ),
+                              Obx(() {
+                                final spent = controller.totalSpentByType;
+
+                                if (controller.isLoading.value) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                return Categorycard(
+                                  title: 'Travel',
+                                  amount: spent['travel'] ?? 0,
+                                  color1: Color(0xFFEC4899),
+                                  color2: Color.fromARGB(255, 179, 55, 117),
+                                  lastUpdateDate: "2025-26-05",
+                                );
+                              }),
+
                               Gap.h20,
-                              Categorycard(
-                                title: 'Item',
-                                amount: 1000000,
-                                color1: Color(0xFFF59E0B),
-                                color2: Color.fromARGB(255, 185, 123, 14),
-                                lastUpdateDate: "2025-26-05",
-                              ),
+                              Obx(() {
+                                final spent = controller.totalSpentByType;
+
+                                if (controller.isLoading.value) {
+                                  return const Center(
+                                    child: CircularProgressIndicator(),
+                                  );
+                                }
+                                return Categorycard(
+                                  title: 'Item',
+                                  amount: spent['item'] ?? 0,
+                                  color1: Color(0xFFF59E0B),
+                                  color2: Color.fromARGB(255, 185, 123, 14),
+                                  lastUpdateDate: "2025-26-05",
+                                );
+                              }),
+
                               Gap.h20,
                               // _buildInvestmentWalletCard,
                               // _buildBestOpportunitiesCard(),
@@ -227,5 +264,50 @@ class ActivitiesView extends GetView<ActivitiesController> {
         ),
       ),
     );
+  }
+
+  Color _getBackgroundColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'education':
+        return Colors.blue[50]!;
+      case 'travel':
+        return Colors.pink[50]!;
+      case 'item':
+        return Colors.orange[50]!;
+      case 'other':
+        return Colors.cyan[50]!;
+      default:
+        return Colors.grey[100]!;
+    }
+  }
+
+  Color _getIconColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'education':
+        return Colors.blue;
+      case 'travel':
+        return Colors.pink;
+      case 'item':
+        return Colors.orange;
+      case 'other':
+        return Colors.cyan;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getIconByType(String type) {
+    switch (type.toLowerCase()) {
+      case 'education':
+        return Icons.school;
+      case 'travel':
+        return Icons.flight;
+      case 'item':
+        return Icons.shopping_cart;
+      case 'other':
+        return Icons.more_horiz;
+      default:
+        return Icons.help_outline;
+    }
   }
 }

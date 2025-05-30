@@ -11,8 +11,8 @@ class ActivitiesCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // Get the controller instance
-    Get.lazyPut(() => ActivitiesController());
-    final ActivitiesController controller = Get.find<ActivitiesController>();
+    final ActivitiesController controller = Get.put(ActivitiesController());
+
     controller.getDashboardActivities(
       FirebaseAuth.instance.currentUser?.uid ?? '',
     );
@@ -40,7 +40,7 @@ class ActivitiesCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Recent Activities',
+                    'Highest Spent Activities',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -48,51 +48,90 @@ class ActivitiesCard extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    'Track you 3 recent activities',
+                    'Track your 4 Highest Spent activities',
                     style: TextStyle(fontSize: 12, color: Colors.grey[600]),
                   ),
                 ],
               ),
-              GestureDetector(
-                onTap: () => controller.refreshActivities(),
-                child: Icon(Icons.refresh, size: 20, color: Colors.grey[600]),
-              ),
+
             ],
           ),
           SizedBox(height: 15),
-          SizedBox(
-            height: SizeApp.customHeight(260),
-            child: Obx(() {
-              if (controller.isLoading.value) {
-                return const Center(child: CircularProgressIndicator());
-              }
-
-              if (controller.top4activities.isEmpty) {
-                return const Center(child: Text("No activities found"));
-              }
-
-              return RefreshIndicator(
-                onRefresh: () => controller.refreshDashboardActivities(),
+          Obx(() {
+            final ActivitiesController controller = Get.put(
+              ActivitiesController(),
+            );
+            if (controller.isLoading.value) {
+              return const Center(child: CircularProgressIndicator());
+            } else {
+              return SizedBox(
+                height: SizeApp.customHeight(260),
                 child: ListView.builder(
-                  itemCount: controller.top4activities.length,
+                  itemCount: controller.top4HighSpentActivities.length,
                   itemBuilder: (context, index) {
-                    final activity = controller.top4activities[index];
+                    final activity = controller.top4HighSpentActivities[index];
                     return ActivitiesItem(
                       title: activity.name,
                       subtitle: activity.description,
-                      amount: '+ ₹ ${activity.spent.toStringAsFixed(2)}',
+                      amount: '+ Rp${activity.spent.toStringAsFixed(2)}',
                       date: activity.date.toString().split(' ')[0],
-                      bgColor: Colors.blue[50]!,
-                      iconColor: Colors.blue,
-                      icon: Icons.arrow_upward,
+                      bgColor: _getBackgroundColor(activity.type),
+                      iconColor: _getIconColor(activity.type),
+                      icon: _getIconByType(activity.type),
                     );
                   },
                 ),
               );
-            }),
-          ),
+            }
+          }),
+
         ],
       ),
     );
+  }
+
+  Color _getBackgroundColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'education':
+        return Colors.blue[50]!;
+      case 'travel':
+        return Colors.pink[50]!;
+      case 'item':
+        return Colors.orange[50]!;
+      case 'other':
+        return Colors.cyan[50]!;
+      default:
+        return Colors.grey[100]!;
+    }
+  }
+
+  Color _getIconColor(String type) {
+    switch (type.toLowerCase()) {
+      case 'education':
+        return Colors.blue;
+      case 'travel':
+        return Colors.pink;
+      case 'item':
+        return Colors.orange;
+      case 'other':
+        return Colors.cyan;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  IconData _getIconByType(String type) {
+    switch (type.toLowerCase()) {
+      case 'education':
+        return Icons.school;
+      case 'travel':
+        return Icons.flight;
+      case 'item':
+        return Icons.shopping_cart;
+      case 'other':
+        return Icons.more_horiz;
+      default:
+        return Icons.help_outline;
+    }
   }
 }

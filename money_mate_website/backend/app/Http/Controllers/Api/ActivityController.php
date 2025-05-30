@@ -4,19 +4,18 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
 use Carbon\Carbon;
-
 //import model Post
 use App\Models\Activity;
 
 //import resource activityResource
 use App\Http\Resources\ActivityResource;
 
-
 //import facade Validator
 use Illuminate\Support\Facades\Validator;
 
+//import facade Validator
+use Illuminate\Support\Facades\Validator;
 class ActivityController extends Controller
 {
     /**
@@ -33,7 +32,6 @@ class ActivityController extends Controller
         return new ActivityResource(true, 'List Data Activity', $activities);
     }
 
-
     /**
      * show
      *
@@ -49,17 +47,55 @@ class ActivityController extends Controller
         return new ActivityResource(true, 'Detail Data Activity!', $activity);
     }
 
-    public function store(Request $request)
-{
-    $validator = Validator::make($request->all(), [
-        'firebase_uid'     => 'required|string|max:255', // Firebase UID
-        'name'        => 'required|string|max:255',
-        'description' => 'nullable|string',
-        'type'        => 'required|string|in:education,travel,item,other',
-        'priority'    => 'required|string|in:noturgent,urgent',
-        'spent'       => 'required|numeric',
-        'date'        => 'nullable|date', // tetap validasi tanggal
-    ]);
+    /**
+     * update
+     *
+     * @param  mixed $request
+     * @param  mixed $id
+     * @return void
+     */
+    public function update(Request $request, $id)
+    {
+
+        //find post by ID
+        $activity = Activity::find($id);
+        //define validation rules
+        $validator = Validator::make($request->all(), [
+            'firebase_uid'=> 'nullable|string|max:255', // Firebase UID
+            'name'        => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'type'        => 'nullable|string|in:education,travel,item,other',
+            'priority'    => 'nullable|string|in:noturgent,urgent',
+            'spent'       => 'required|numeric',
+            'date'        => 'nullable|date', // tetap validasi tanggal
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $date = $request->date ? Carbon::parse($request->date)->format('Y-m-d H:i:s') : null;
+
+
+        
+        $activity->update([
+            'spent'     => $request->spent,
+                
+        ]);
+
+        // $activity = Activity::update([
+        //     'firebase_uid'     => $request->firebase_uid, // Firebase UID
+        //     'name'        => $request->name,
+        //     'description' => $request->description,
+        //     'type'        => $request->type,
+        //     'priority'    => $request->priority,
+        //     'spent'       => $request->spent,
+            
+        // ]);
+
+        //return response
+        return new ActivityResource(true, 'Data Post Berhasil Diubah!', $activity);
+    }
 
 
     public function store(Request $request)
@@ -83,23 +119,16 @@ class ActivityController extends Controller
     $activity = Activity::create([
         'firebase_uid'     => $request->firebase_uid, // Firebase UID
 
+
     // Create activity
     $activity = Activity::create([
-
         'name'        => $request->name,
         'description' => $request->description,
         'type'        => $request->type,
         'priority'    => $request->priority,
         'spent'       => $request->spent,
-
         'date'        => $date,
     ]);
-
-=======
-        'date'        => $request->date,
-    ]);
-
-    // Return response
 
     return response()->json([
         'success' => true,
@@ -107,6 +136,4 @@ class ActivityController extends Controller
         'data'    => $activity
     ]);
 }
-
-
-}
+      }

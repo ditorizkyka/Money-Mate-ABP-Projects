@@ -20,8 +20,7 @@ return new class extends Migration
             $table->decimal('total_spent', 12, 2)->default(0); // Total yang sudah dihabiskan
             $table->timestamps();
         });
-
-           
+        
     }
 
     /**

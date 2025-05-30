@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:frontend/app/modules/activities/controllers/activities_controller.dart';
 import 'package:frontend/constant/constant.dart';
+import 'package:get/get.dart';
 
 class PortofolioCard extends StatelessWidget {
   const PortofolioCard({super.key});
 
   @override
   Widget build(BuildContext context) {
+    ActivitiesController activityController = Get.put(ActivitiesController());
     return Container(
       height: SizeApp.customHeight(270),
       padding: EdgeInsets.all(24),
@@ -43,12 +46,14 @@ class PortofolioCard extends StatelessWidget {
           Row(
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
-              Text(
-                'Rp8000',
-                style: TextStyle(
-                  fontSize: 32,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
+              Obx(
+                () => Text(
+                  'Rp${activityController.totalSpent.value.toStringAsFixed(0)}',
+                  style: TextStyle(
+                    fontSize: 32,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
                 ),
               ),
               Text(
@@ -67,49 +72,93 @@ class PortofolioCard extends StatelessWidget {
           Container(
             height: 8,
             decoration: BoxDecoration(borderRadius: BorderRadius.circular(4)),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 35,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: ColorApp.mainColor,
-                      borderRadius: BorderRadius.only(
-                        topLeft: Radius.circular(4),
-                        bottomLeft: Radius.circular(4),
+            child: Obx(() {
+              final activitiesController = Get.find<ActivitiesController>();
+
+              return Row(
+                children: [
+                  Expanded(
+                    flex:
+                        activitiesController.percentageByType['education']
+                            ?.toInt() ??
+                        0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: ColorApp.mainColor,
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(4),
+                          bottomLeft: Radius.circular(4),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                Expanded(flex: 28, child: Container(color: Color(0xFFEC4899))),
-                Expanded(flex: 22, child: Container(color: Color(0xFF06B6D4))),
-                Expanded(
-                  flex: 15,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      color: Color(0xFFF59E0B),
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(4),
-                        bottomRight: Radius.circular(4),
+                  Expanded(
+                    flex:
+                        activitiesController.percentageByType['travel']
+                            ?.toInt() ??
+                        0,
+                    child: Container(color: Color(0xFFEC4899)),
+                  ),
+                  Expanded(
+                    flex:
+                        activitiesController.percentageByType['item']
+                            ?.toInt() ??
+                        0,
+                    child: Container(color: Color(0xFF06B6D4)),
+                  ),
+                  Expanded(
+                    flex:
+                        activitiesController.percentageByType['other']
+                            ?.toInt() ??
+                        0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Color(0xFFF59E0B),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(4),
+                          bottomRight: Radius.circular(4),
+                        ),
                       ),
                     ),
                   ),
-                ),
-              ],
-            ),
+                ],
+              );
+            }),
           ),
           SizedBox(height: 16),
 
           // Categories
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              _buildCategoryItem('Rp3000,000', 'Education', ColorApp.mainColor),
-              _buildCategoryItem('Rp4000,000', 'Travel', Color(0xFFEC4899)),
-              _buildCategoryItem('Rp500,000', 'Item', Color(0xFFF59E0B)),
-              _buildCategoryItem('Rp600,000', 'Other', Color(0xFF06B6D4)),
-            ],
-          ),
+          Obx(() {
+            final activitiesController = Get.find<ActivitiesController>();
+            final spent = activitiesController.totalSpentByType;
+            return spent.isEmpty
+                ? Center(child: Text('No data available'))
+                : Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildCategoryItem(
+                      'Rp${activityController.totalSpentByType['education']?.toStringAsFixed(0) ?? '0'}',
+                      'Education',
+                      ColorApp.mainColor,
+                    ),
+                    _buildCategoryItem(
+                      'Rp${activityController.totalSpentByType['travel']?.toStringAsFixed(0) ?? '0'}',
+                      'Travel',
+                      Color(0xFFEC4899),
+                    ),
+                    _buildCategoryItem(
+                      'Rp${activityController.totalSpentByType['item']?.toStringAsFixed(0) ?? '0'}',
+                      'Item',
+                      Color(0xFFF59E0B),
+                    ),
+                    _buildCategoryItem(
+                      'Rp${activityController.totalSpentByType['other']?.toStringAsFixed(0) ?? '0'}',
+                      'Other',
+                      Color(0xFF06B6D4),
+                    ),
+                  ],
+                );
+          }),
           SizedBox(height: 20),
 
           // Stats

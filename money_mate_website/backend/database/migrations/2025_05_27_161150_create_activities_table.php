@@ -21,7 +21,9 @@ return new class extends Migration
         $table->integer('spent')->default(0);
         $table->date('date')->nullable();
         $table->timestamps();
+
       });
+      
     }
 
     /**
