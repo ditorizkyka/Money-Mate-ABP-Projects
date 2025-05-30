@@ -142,11 +142,13 @@ class ActivitiesView extends GetView<ActivitiesController> {
                                                 title: activity.name,
                                                 subtitle: activity.description,
                                                 amount:
+
                                                     '+ Rp${activity.spent.toStringAsFixed(2)}',
                                                 date:
                                                     activity.date
                                                         .toString()
                                                         .split(' ')[0],
+
                                                 bgColor: _getBackgroundColor(
                                                   activity.type,
                                                 ),

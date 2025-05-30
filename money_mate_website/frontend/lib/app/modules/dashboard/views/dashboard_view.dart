@@ -86,7 +86,9 @@ class InvestmentDashboard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // Header
+
               _buildWelcomeSection(),
+
               SizedBox(height: 30),
 
               // Responsive Grid Layout
@@ -371,6 +373,7 @@ class Header extends StatelessWidget {
                 _buildLogo(),
                 _buildNavigation(),
                 const Spacer(),
+
                 _buildUserProfile(),
               ],
             );

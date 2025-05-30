@@ -12,6 +12,7 @@ class ActivitiesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get the controller instance
     final ActivitiesController controller = Get.put(ActivitiesController());
+
     controller.getDashboardActivities(
       FirebaseAuth.instance.currentUser?.uid ?? '',
     );
@@ -52,6 +53,7 @@ class ActivitiesCard extends StatelessWidget {
                   ),
                 ],
               ),
+
             ],
           ),
           SizedBox(height: 15),
@@ -82,6 +84,7 @@ class ActivitiesCard extends StatelessWidget {
               );
             }
           }),
+
         ],
       ),
     );

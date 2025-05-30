@@ -1,7 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/app/modules/activities/controllers/activities_controller.dart';
 import 'package:frontend/app/shared/constanta.dart';
+
 import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
@@ -15,6 +17,7 @@ class DashboardController extends GetxController {
     super.onInit();
     var controller = Get.put(ActivitiesController());
     final currentUser = FirebaseAuth.instance.currentUser;
+
 
     if (currentUser != null) {
       controller.getActivityById(currentUser.uid);
@@ -104,6 +107,7 @@ class DashboardController extends GetxController {
   /// Update limit value (called from UI)
   void updateLimit(int newLimit) {
     limit.value = newLimit;
+
   }
 
   @override

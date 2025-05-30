@@ -10,17 +10,20 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+   
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var array
      */
     protected $fillable = [
-        'firebase_uid',
+        'firebase_uid', // Firebase UID for user identification
         'name',
         'email',
-        'limit',
-        'total_spent', // Pastikan field ini ada di database
+        'limit', // Example: spending limit
+        'created_at',
+        'updated_at',
+        // jika  ada
     ];
 
     /**
@@ -28,6 +31,7 @@ class User extends Authenticatable
      *
      * @var array<string, string>
      */
+
     protected $casts = [
         'limit' => 'decimal:2',
         'total_spent' => 'decimal:2',

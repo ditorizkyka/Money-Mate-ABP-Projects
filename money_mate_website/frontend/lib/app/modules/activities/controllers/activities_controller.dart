@@ -1,10 +1,12 @@
 import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:frontend/app/data/model/Activity.dart';
 import 'package:get/get.dart';
 
 class ActivitiesController extends GetxController {
+
   var activities = <Activity>[].obs;
   var top4activities = <Activity>[].obs;
   var isLoading = false.obs;
@@ -34,6 +36,7 @@ class ActivitiesController extends GetxController {
     super.onInit();
     _initializeDio();
 
+
     final currentUser = FirebaseAuth.instance.currentUser;
     if (currentUser != null) {
       getActivityById(currentUser.uid);
@@ -46,11 +49,11 @@ class ActivitiesController extends GetxController {
     _dio = Dio();
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
-
     _dio.interceptors.add(
       LogInterceptor(requestBody: true, responseBody: true, error: true),
     );
   }
+
 
   Future<void> getActivityById(String activityId) async {
     try {
@@ -102,6 +105,7 @@ class ActivitiesController extends GetxController {
     }
   }
 
+
   Future<void> getDashboardActivities(String activityId) async {
     try {
       isLoading.value = true;
@@ -116,6 +120,7 @@ class ActivitiesController extends GetxController {
       );
 
       if (response.statusCode == 200) {
+
         activities.clear();
         totalSpent.value = 0;
 
@@ -141,6 +146,7 @@ class ActivitiesController extends GetxController {
       log("Get activity error: $e");
       Get.snackbar("Error", "Failed to get activity: ${e.toString()}");
     }
+
   }
 
   // Metode untuk mengelompokkan activity dan menghitung total spent per type
@@ -189,6 +195,7 @@ class ActivitiesController extends GetxController {
     final sorted = List<Activity>.from(activities);
     sorted.sort((a, b) => b.spent.compareTo(a.spent)); // Descending
     top4HighSpentActivities.value = sorted.take(4).toList();
+
   }
 
   @override

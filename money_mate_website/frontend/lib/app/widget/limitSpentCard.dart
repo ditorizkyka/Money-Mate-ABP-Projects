@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/modules/dashboard/controllers/dashboard_controller.dart';
+
 import 'package:frontend/constant/constant.dart';
 import 'package:get/get.dart';
 
@@ -8,6 +9,7 @@ class LimitSpentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     DashboardController dashboardController = Get.put(DashboardController());
     return Obx(
       () => Container(
@@ -163,7 +165,6 @@ class LimitSpentCard extends StatelessWidget {
     TextEditingController limitSpentController = TextEditingController();
     // Set initial value jika sudah ada limit sebelumnya
     limitSpentController.text = controller.limit.value.toString();
-
     Get.dialog(
       barrierDismissible: true,
       useSafeArea: true,
@@ -171,6 +172,7 @@ class LimitSpentCard extends StatelessWidget {
         backgroundColor: Colors.white,
         title: SizedBox(
           width: 400,
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -190,6 +192,7 @@ class LimitSpentCard extends StatelessWidget {
             ],
           ),
         ),
+
         content: TextField(
           controller: limitSpentController,
           keyboardType: TextInputType.number,
@@ -198,11 +201,13 @@ class LimitSpentCard extends StatelessWidget {
             hintText: 'Enter amount in Rupiah',
             border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
             prefixText: 'Rp ',
+
           ),
         ),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
+
             child: Text('Cancel', style: TextStyle(color: Colors.black)),
           ),
           Obx(
@@ -264,6 +269,7 @@ class LimitSpentCard extends StatelessWidget {
                         ),
                       )
                       : Text('Save'),
+
             ),
           ),
         ],

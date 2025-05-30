@@ -13,6 +13,9 @@ use App\Http\Resources\ActivityResource;
 
 //import facade Validator
 use Illuminate\Support\Facades\Validator;
+
+//import facade Validator
+use Illuminate\Support\Facades\Validator;
 class ActivityController extends Controller
 {
     /**
@@ -94,26 +97,31 @@ class ActivityController extends Controller
         return new ActivityResource(true, 'Data Post Berhasil Diubah!', $activity);
     }
 
+
     public function store(Request $request)
 {
+    // Define validation rules
     $validator = Validator::make($request->all(), [
-        'firebase_uid'     => 'required|string|max:255', // Firebase UID
         'name'        => 'required|string|max:255',
         'description' => 'nullable|string',
-        'type'        => 'required|string|in:education,travel,item,other',
-        'priority'    => 'required|string|in:noturgent,urgent',
-        'spent'       => 'required|numeric',
-        'date'        => 'nullable|date', // tetap validasi tanggal
+        'type'        => 'required|string|in:general,event,task',
+        'priority'    => 'required|string|in:low,medium,high',
+        'spent'       => 'required|numeric', // asumsi disimpan sebagai angka (rupiah)
+        'date'        => 'nullable|date',
     ]);
 
+    // Check if validation fails
     if ($validator->fails()) {
         return response()->json($validator->errors(), 422);
     }
-
     $date = $request->date ? Carbon::parse($request->date)->format('Y-m-d H:i:s') : null;
 
     $activity = Activity::create([
         'firebase_uid'     => $request->firebase_uid, // Firebase UID
+
+
+    // Create activity
+    $activity = Activity::create([
         'name'        => $request->name,
         'description' => $request->description,
         'type'        => $request->type,
@@ -128,7 +136,4 @@ class ActivityController extends Controller
         'data'    => $activity
     ]);
 }
-
-    
-
-}
+      }
