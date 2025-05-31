@@ -71,7 +71,7 @@ class UserController extends Controller
             'firebase_uid' => 'nullable|string|max:255|unique:users,firebase_uid,',
             'name'        => 'nullable|string|max:255',
             'email'       => 'nullable|string|email',
-            'limit'       => 'required|numeric|min:0',
+            'limit'       => 'nullable|numeric|min:0',
             'total_spent' => 'nullable|numeric|min:0',
         ]);
 
@@ -81,27 +81,29 @@ class UserController extends Controller
         //find user by id
         $user = User::where('firebase_uid', $firebase_uid)->first();
         
-        $user->update([
+
+       //pengecekan jika limit ada/ nama ada/ limit tidak ada
+
+        if ($request->has('limit')) {
+             $user->update([
             'limit'     => $request->limit,
         ]);
+        }
 
-        // $activity = Activity::update([
-        //     'firebase_uid'     => $request->firebase_uid, // Firebase UID
-        //     'name'        => $request->name,
-        //     'description' => $request->description,
-        //     'type'        => $request->type,
-        //     'priority'    => $request->priority,
-        //     'spent'       => $request->spent,
-            
-        // ]);
+        if ($request->has('name')) {
+             $user->update([
+            'name'     => $request->name,
+        ]);
+        }
+
 
         //return response
         return new UserResource(true, 'Data Post Berhasil Diubah!', $user);
     }
 
-    public function destroy($id)
+    public function destroy($firebase_uid)
     {
-        $user = User::find($id);
+         $user = User::where('firebase_uid', $firebase_uid)->first();
         
         if (!$user) {
             return response()->json([

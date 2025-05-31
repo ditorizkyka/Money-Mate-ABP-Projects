@@ -54,7 +54,7 @@ class Categorycard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Text(
-                'Rp$amount',
+                'Rp${amount.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.bold,
@@ -62,7 +62,7 @@ class Categorycard extends StatelessWidget {
                 ),
               ),
               Text(
-                ' 250',
+                ' 00',
                 style: TextStyle(
                   fontSize: 18,
                   fontWeight: FontWeight.w400,

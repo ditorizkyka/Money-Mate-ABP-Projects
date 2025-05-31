@@ -6,10 +6,10 @@ import 'package:get/get.dart';
 class SignupController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  // Observable loading state (optional)
+  // Observable loading state
   final isLoading = false.obs;
 
-  // Signup method
+  // Signup method dengan rollback mechanism
   Future<void> signup({
     required String fullname,
     required String email,
@@ -17,12 +17,16 @@ class SignupController extends GetxController {
     required int limit,
   }) async {
     isLoading.value = true;
-    try {
-      // Buat user baru dengan email & password
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
+    UserCredential? userCredential;
 
-      // Set displayName (fullname)
+    try {
+      // Step 1: Buat user baru dengan email & password
+      userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Step 2: Set displayName (fullname)
       await userCredential.user?.updateDisplayName(fullname);
 
       // Step 3: Simpan data ke Laravel backend
@@ -33,25 +37,46 @@ class SignupController extends GetxController {
         limit: limit,
       );
 
+      // Jika sampai sini, berarti semua berhasil
       Get.snackbar("Success", "User berhasil didaftarkan");
-      // melakukan penyimpanan data ke laravel backend
-
-      // Arahkan ke halaman lain, misalnya dashboard
-      Get.offAllNamed('/dashboard'); // ganti sesuai rute kamu
+      Get.offAllNamed('/dashboard');
     } on FirebaseAuthException catch (e) {
-      String message = "Terjadi kesalahan";
+      // Handle Firebase Auth errors
+      String message = "Terjadi kesalahan pada Firebase Auth";
 
       if (e.code == 'email-already-in-use') {
         message = "Email sudah terdaftar";
       } else if (e.code == 'weak-password') {
         message = "Password terlalu lemah";
+      } else if (e.code == 'invalid-email') {
+        message = "Format email tidak valid";
       }
 
       Get.snackbar("Signup Gagal", message);
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      // Jika error terjadi setelah Firebase user berhasil dibuat
+      // maka kita perlu menghapus user tersebut (rollback)
+      if (userCredential?.user != null) {
+        await _rollbackFirebaseUser(userCredential!.user!);
+      }
+
+      // Tampilkan error message
+      Get.snackbar("Error", "Signup gagal: ${e.toString()}");
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  // Method untuk rollback (menghapus) user Firebase
+  Future<void> _rollbackFirebaseUser(User user) async {
+    try {
+      print("Melakukan rollback - menghapus user Firebase: ${user.uid}");
+      await user.delete();
+      print("User Firebase berhasil dihapus");
+    } catch (e) {
+      print("Gagal menghapus user Firebase: ${e.toString()}");
+      // Optional: Anda bisa menambahkan logging atau error handling lainnya
+      // Tapi jangan throw error lagi karena sudah dalam kondisi error handling
     }
   }
 
@@ -64,7 +89,7 @@ class SignupController extends GetxController {
   }) async {
     try {
       final response = await dio.post(
-        'http://localhost:8000/api/user', // endpoint Laravel Anda
+        'http://localhost:8000/api/user',
         data: {
           'firebase_uid': uid,
           'name': fullname,
@@ -76,8 +101,6 @@ class SignupController extends GetxController {
           headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
-            // Jika menggunakan authentication token
-            // 'Authorization': 'Bearer YOUR_TOKEN_HERE',
           },
         ),
       );
@@ -85,23 +108,24 @@ class SignupController extends GetxController {
       if (response.statusCode == 200 || response.statusCode == 201) {
         return response.data;
       } else {
-        throw Exception('Failed to save user to backend');
+        throw Exception(
+          'Failed to save user to backend: Status ${response.statusCode}',
+        );
       }
     } on DioException catch (e) {
-      // Handle Dio specific errors
       String errorMessage = "Gagal menyimpan data ke server";
 
       if (e.type == DioExceptionType.connectionTimeout) {
         errorMessage = "Koneksi timeout";
       } else if (e.type == DioExceptionType.receiveTimeout) {
         errorMessage = "Server tidak merespon";
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = "Tidak dapat terhubung ke server";
       } else if (e.response != null) {
-        // Server responded with error
         final statusCode = e.response!.statusCode;
         final responseData = e.response!.data;
 
         if (statusCode == 422) {
-          // Validation error
           errorMessage =
               "Data tidak valid: ${responseData['message'] ?? 'Periksa data Anda'}";
         } else if (statusCode == 500) {
@@ -112,11 +136,73 @@ class SignupController extends GetxController {
         }
       }
 
-      Get.snackbar("Error Backend", errorMessage);
+      // Throw exception dengan pesan yang sudah diformat
+      // Ini akan ditangkap oleh catch block di method signup
       throw Exception(errorMessage);
     } catch (e) {
-      Get.snackbar("Error", "Gagal menyimpan data: ${e.toString()}");
-      throw Exception(e.toString());
+      // Handle general errors
+      throw Exception("Gagal menyimpan data: ${e.toString()}");
+    }
+  }
+
+  // Alternative method: Signup dengan transaction-like approach
+  Future<void> signupWithTransaction({
+    required String fullname,
+    required String email,
+    required String password,
+    required int limit,
+  }) async {
+    isLoading.value = true;
+    UserCredential? userCredential;
+    bool backendSaved = false;
+
+    try {
+      // Step 1: Create Firebase user
+      userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Step 2: Update display name
+      await userCredential.user?.updateDisplayName(fullname);
+
+      // Step 3: Save to backend
+      await saveUserToBackend(
+        uid: userCredential.user!.uid,
+        fullname: fullname,
+        email: email,
+        limit: limit,
+      );
+
+      backendSaved = true;
+
+      // Success
+      Get.snackbar("Success", "User berhasil didaftarkan");
+      Get.offAllNamed('/dashboard');
+    } catch (e) {
+      // Rollback logic
+      if (userCredential?.user != null && !backendSaved) {
+        await _rollbackFirebaseUser(userCredential!.user!);
+        Get.snackbar(
+          "Rollback",
+          "Akun Firebase telah dihapus karena gagal menyimpan ke database",
+        );
+      }
+
+      // Handle specific errors
+      if (e is FirebaseAuthException) {
+        String message = "Terjadi kesalahan pada Firebase Auth";
+        if (e.code == 'email-already-in-use') {
+          message = "Email sudah terdaftar";
+        } else if (e.code == 'weak-password') {
+          message = "Password terlalu lemah";
+        }
+        Get.snackbar("Signup Gagal", message);
+      } else {
+        Get.snackbar("Error", "Signup gagal: ${e.toString()}");
+      }
+    } finally {
+      isLoading.value = false;
     }
   }
 }

@@ -48,7 +48,7 @@ class PortofolioCard extends StatelessWidget {
             children: [
               Obx(
                 () => Text(
-                  'Rp${activityController.totalSpent.value.toStringAsFixed(0)}',
+                  'Rp${activityController.totalSpent.value.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -57,7 +57,7 @@ class PortofolioCard extends StatelessWidget {
                 ),
               ),
               Text(
-                ' 900',
+                ' 00',
                 style: TextStyle(
                   fontSize: 24,
                   fontWeight: FontWeight.w400,
@@ -137,22 +137,22 @@ class PortofolioCard extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     _buildCategoryItem(
-                      'Rp${activityController.totalSpentByType['education']?.toStringAsFixed(0) ?? '0'}',
+                      'Rp${activityController.totalSpentByType['education']?.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},') ?? '0'}',
                       'Education',
                       ColorApp.mainColor,
                     ),
                     _buildCategoryItem(
-                      'Rp${activityController.totalSpentByType['travel']?.toStringAsFixed(0) ?? '0'}',
+                      'Rp${activityController.totalSpentByType['travel']?.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},') ?? '0'}',
                       'Travel',
                       Color(0xFFEC4899),
                     ),
                     _buildCategoryItem(
-                      'Rp${activityController.totalSpentByType['item']?.toStringAsFixed(0) ?? '0'}',
+                      'Rp${activityController.totalSpentByType['item']?.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},') ?? '0'}',
                       'Item',
                       Color(0xFFF59E0B),
                     ),
                     _buildCategoryItem(
-                      'Rp${activityController.totalSpentByType['other']?.toStringAsFixed(0) ?? '0'}',
+                      'Rp${activityController.totalSpentByType['other']?.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},') ?? '0'}',
                       'Other',
                       Color(0xFF06B6D4),
                     ),

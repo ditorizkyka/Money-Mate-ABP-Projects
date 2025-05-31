@@ -1,4 +1,5 @@
 import 'dart:developer';
+
 import 'package:dio/dio.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:frontend/app/data/model/Activity.dart';
@@ -46,7 +47,6 @@ class ActivitiesController extends GetxController {
     _dio = Dio();
     _dio.options.connectTimeout = const Duration(seconds: 30);
     _dio.options.receiveTimeout = const Duration(seconds: 30);
-
     _dio.interceptors.add(
       LogInterceptor(requestBody: true, responseBody: true, error: true),
     );
@@ -85,13 +85,6 @@ class ActivitiesController extends GetxController {
     } catch (e) {
       log("Get activity error: $e");
       Get.snackbar("Error", "Failed to get activity: ${e.toString()}");
-    }
-  }
-
-  Future<void> refreshActivities() async {
-    final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser != null) {
-      await getActivityById(currentUser.uid);
     }
   }
 

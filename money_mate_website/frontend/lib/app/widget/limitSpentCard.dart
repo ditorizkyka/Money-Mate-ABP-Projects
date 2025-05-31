@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:frontend/app/modules/dashboard/controllers/dashboard_controller.dart';
+import 'package:frontend/app/modules/profile/controllers/profile_controller.dart';
+
 import 'package:frontend/constant/constant.dart';
 import 'package:get/get.dart';
 
@@ -9,6 +11,7 @@ class LimitSpentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     DashboardController dashboardController = Get.put(DashboardController());
+    ProfileController profileController = Get.put(ProfileController());
     return Obx(
       () => Container(
         height: SizeApp.customHeight(270),
@@ -58,16 +61,18 @@ class LimitSpentCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        'Rp${dashboardController.limit.value.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}, ',
-                        style: TextStyle(
-                          fontSize: 30,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                      Obx(
+                        () => Text(
+                          'Rp${profileController.currentUser.value.limit.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}, ',
+                          style: TextStyle(
+                            fontSize: 30,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
                         ),
                       ),
                       Text(
-                        '000',
+                        '00',
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.w400,
@@ -163,7 +168,6 @@ class LimitSpentCard extends StatelessWidget {
     TextEditingController limitSpentController = TextEditingController();
     // Set initial value jika sudah ada limit sebelumnya
     limitSpentController.text = controller.limit.value.toString();
-
     Get.dialog(
       barrierDismissible: true,
       useSafeArea: true,
@@ -171,6 +175,7 @@ class LimitSpentCard extends StatelessWidget {
         backgroundColor: Colors.white,
         title: SizedBox(
           width: 400,
+
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -190,6 +195,7 @@ class LimitSpentCard extends StatelessWidget {
             ],
           ),
         ),
+
         content: TextField(
           controller: limitSpentController,
           keyboardType: TextInputType.number,
@@ -203,6 +209,7 @@ class LimitSpentCard extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () => Get.back(),
+
             child: Text('Cancel', style: TextStyle(color: Colors.black)),
           ),
           Obx(

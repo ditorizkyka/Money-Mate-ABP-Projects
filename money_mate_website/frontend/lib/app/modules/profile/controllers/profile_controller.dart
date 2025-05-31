@@ -1,35 +1,67 @@
+import 'dart:developer';
+import 'package:dio/dio.dart'; // Tambahkan import ini
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:frontend/app/data/model/UserAccount.dart';
+import 'package:frontend/app/shared/constanta.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 
 class ProfileController extends GetxController {
   // Observable variables
-  var userName = 'John Doe'.obs;
-  var userEmail = 'john.doe@example.com'.obs;
+  var currentUser =
+      UserAccount(
+        id: 0,
+        firebaseUid: '',
+        name: '',
+        email: '',
+        limit: 0,
+        totalSpent: '0',
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ).obs; // Observable for user name
   var profileImageUrl = 'https://via.placeholder.com/150'.obs;
+  var isLoading = false.obs;
+  var name = ''.obs; // Observable for user name input
 
   @override
   void onInit() {
     super.onInit();
-    // Load user data when controller is initialized
-    loadUserData();
+
+    loadUserData(FirebaseAuth.instance.currentUser?.uid ?? '');
   }
 
   // Load user data from storage or API
-  void loadUserData() {
-    // TODO: Implement loading user data from your backend/storage
-    // For now, using dummy data
-    userName.value = 'John Doe';
-    userEmail.value = 'john.doe@example.com';
-    profileImageUrl.value = 'https://via.placeholder.com/150';
+  Future<void> loadUserData(String uid) async {
+    try {
+      isLoading.value = true;
+      final response = await dio.get(
+        'http://localhost:8000/api/user/$uid',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        UserAccount user = UserAccount.fromJson(response.data['data']);
+        currentUser.value = user; // Update observable with user data
+        // Pemanggilan metode pemisah dan perhitungan
+        name.value = user.name; // Set initial name value
+        isLoading.value = false;
+      } else {
+        throw Exception("HTTP ${response.statusCode}: Failed to get activity");
+      }
+    } on DioException catch (e) {
+      log("Dio error: $e");
+    } catch (e) {
+      log("Get activity error: $e");
+      Get.snackbar("Error", "Failed to get User: ${e.toString()}");
+    }
   }
 
   // Update user name
-  void updateUserName(String newName) {
-    userName.value = newName;
-    // TODO: Update name in backend/storage
-    _saveUserData();
-  }
 
   // Change profile image
   void changeProfileImage() {
@@ -75,22 +107,143 @@ class ProfileController extends GetxController {
     );
   }
 
-  // Logout function
-
-  Future<void> logout() async {
-    Get.dialog(
-      Center(child: CircularProgressIndicator()),
-      barrierDismissible: false,
-    );
+  Future<void> setNewName(String newName) async {
     try {
-      await FirebaseAuth.instance.signOut();
-      // var box = await Hive.openBox('userBox');
-      // box.put('isLoggedIn', false);
-      // Navigate to login page
+      // Validasi user login
+      String uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      if (uid.isEmpty) {
+        Get.snackbar(
+          "Error",
+          "User tidak login",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
 
-      Get.back(); // Close loading dialog
-      _clearUserSession();
-      Get.offAllNamed('/signin'); // Adjust route name as per your app
+      // Validasi input
+      if (newName.trim().isEmpty) {
+        Get.snackbar(
+          "Error",
+          "Nama tidak boleh kosong!",
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
+
+      isLoading.value = true;
+
+      // Update Firebase displayName
+      await FirebaseAuth.instance.currentUser?.updateDisplayName(
+        newName.trim(),
+      );
+
+      // Update backend
+      final response = await dio.put(
+        'http://localhost:8000/api/user/$uid',
+        data: {'name': newName.trim(), '_method': 'PUT'},
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        // Update local state
+        name.value = newName.trim();
+
+        Get.snackbar(
+          "Berhasil",
+          "Nama berhasil diperbarui",
+          backgroundColor: Colors.green,
+          colorText: Colors.white,
+        );
+      } else {
+        throw Exception('Gagal memperbarui nama: ${response.statusCode}');
+      }
+    } on DioException catch (e) {
+      String errorMessage = "Gagal memperbarui nama";
+
+      if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = "Koneksi timeout";
+      } else if (e.type == DioExceptionType.receiveTimeout) {
+        errorMessage = "Server tidak merespon";
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = "Tidak dapat terhubung ke server";
+      } else if (e.response != null) {
+        final statusCode = e.response!.statusCode;
+        final responseData = e.response!.data;
+
+        if (statusCode == 422) {
+          errorMessage =
+              "Data tidak valid: ${responseData['message'] ?? 'Periksa data Anda'}";
+        } else if (statusCode == 500) {
+          errorMessage = "Server error";
+        } else if (statusCode == 404) {
+          errorMessage = "User tidak ditemukan";
+        } else {
+          errorMessage =
+              "Error: ${responseData['message'] ?? 'Terjadi kesalahan'}";
+        }
+      }
+
+      Get.snackbar(
+        "Error",
+        errorMessage,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+
+      print("Dio Error: ${e.toString()}");
+    } on FirebaseAuthException catch (e) {
+      String errorMessage = "Gagal memperbarui profil Firebase";
+
+      if (e.code == 'requires-recent-login') {
+        errorMessage = "Silakan login ulang untuk memperbarui profil";
+      }
+
+      Get.snackbar(
+        "Error Firebase",
+        errorMessage,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+
+      print("Firebase Error: ${e.toString()}");
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Gagal memperbarui nama: ${e.toString()}",
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+
+      print("General Error: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Logout function dengan proper error handling
+  Future<void> logout() async {
+    try {
+      // Show loading
+      Get.dialog(
+        Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
+      // Sign out from Firebase
+      await FirebaseAuth.instance.signOut();
+
+      // Close loading dialog
+      Get.back();
+
+      // Navigate to signin page
+      Get.offAllNamed('/signin');
 
       Get.snackbar(
         'Berhasil',
@@ -98,36 +251,63 @@ class ProfileController extends GetxController {
         backgroundColor: Colors.green,
         colorText: Colors.white,
       );
+    } on FirebaseAuthException catch (e) {
+      Get.back(); // Close loading dialog
+      Get.snackbar(
+        'Error',
+        'Gagal keluar dari akun: ${e.message}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      print("Firebase Auth Error saat logout: $e");
     } catch (e) {
-      print("Error saat sign out: $e");
+      Get.back(); // Close loading dialog
+      Get.snackbar(
+        'Error',
+        'Terjadi kesalahan saat logout',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      print("Error saat logout: $e");
     }
   }
 
-  // Delete account function
-  void deleteAccount() {
-    Get.dialog(
-      Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircularProgressIndicator(),
-            SizedBox(height: 16),
-            Text('Menghapus akun...', style: TextStyle(color: Colors.white)),
-          ],
+  // Delete account function dengan proper implementation
+  Future<void> deleteAccount() async {
+    try {
+      // Show loading
+      final user = FirebaseAuth.instance.currentUser;
+
+      Get.dialog(
+        Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text('Menghapus akun...', style: TextStyle(color: Colors.white)),
+            ],
+          ),
         ),
-      ),
-      barrierDismissible: false,
-    );
+        barrierDismissible: false,
+      );
+      if (user != null) {
+        await user.delete(); // <- Ini menghapus akun dari Firebase Auth
+        // Delete from backend first
+        await _deleteUserFromBackend(user.uid);
+      } else {
+        Get.back();
+        Get.snackbar(
+          'Error',
+          'User tidak ditemukan',
+          backgroundColor: Colors.red,
+          colorText: Colors.white,
+        );
+        return;
+      }
 
-    // Simulate delete account process
-    Future.delayed(Duration(seconds: 3), () {
-      Get.back(); // Close loading dialog
-
-      // TODO: Call API to delete account
-      _performAccountDeletion();
-
-      // Navigate to welcome/login page
-      Get.offAllNamed('/welcome'); // Adjust route name as per your app
+      // Navigate to welcome page
+      Get.offAllNamed('/signin');
 
       Get.snackbar(
         'Akun Dihapus',
@@ -136,22 +316,62 @@ class ProfileController extends GetxController {
         colorText: Colors.white,
         duration: Duration(seconds: 4),
       );
-    });
+    } on FirebaseAuthException catch (e) {
+      Get.back(); // Close loading dialog
+
+      String errorMessage = "Gagal menghapus akun";
+      if (e.code == 'requires-recent-login') {
+        errorMessage = "Silakan login ulang sebelum menghapus akun";
+      }
+
+      Get.snackbar(
+        'Error',
+        errorMessage,
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } on DioException catch (e) {
+      Get.back(); // Close loading dialog
+      Get.snackbar(
+        'Error',
+        'Gagal menghapus data dari server',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+    } catch (e) {
+      Get.back(); // Close loading dialog
+      Get.snackbar(
+        'Error',
+        'Gagal menghapus akun: ${e.toString()}',
+        backgroundColor: Colors.red,
+        colorText: Colors.white,
+      );
+      print("Error menghapus akun: $e");
+    }
+  }
+
+  // Method untuk menghapus user dari backend
+  Future<void> _deleteUserFromBackend(String uid) async {
+    try {
+      final response = await dio.delete(
+        'http://localhost:8000/api/user/$uid',
+        options: Options(
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode != 200 && response.statusCode != 204) {
+        throw Exception('Failed to delete user from backend');
+      }
+    } on DioException catch (e) {
+      print("Error deleting user from backend: $e");
+      // Rethrow untuk ditangkap di method deleteAccount
+      rethrow;
+    }
   }
 
   // Private methods
-  void _saveUserData() {
-    // TODO: Save user data to local storage or send to backend
-    print('Saving user data: ${userName.value}');
-  }
-
-  void _clearUserSession() {
-    // TODO: Clear tokens, user data from shared preferences or secure storage
-    print('Clearing user session');
-  }
-
-  void _performAccountDeletion() {
-    // TODO: Call your backend API to delete user account
-    print('Deleting user account');
-  }
 }

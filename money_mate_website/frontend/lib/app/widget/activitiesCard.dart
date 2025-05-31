@@ -12,6 +12,7 @@ class ActivitiesCard extends StatelessWidget {
   Widget build(BuildContext context) {
     // Get the controller instance
     final ActivitiesController controller = Get.put(ActivitiesController());
+
     controller.getDashboardActivities(
       FirebaseAuth.instance.currentUser?.uid ?? '',
     );
@@ -61,6 +62,17 @@ class ActivitiesCard extends StatelessWidget {
             );
             if (controller.isLoading.value) {
               return const Center(child: CircularProgressIndicator());
+            }
+            if (controller.top4HighSpentActivities.isEmpty) {
+              return SizedBox(
+                height: SizeApp.customHeight(270),
+                child: Center(
+                  child: Text(
+                    'No activities found',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                ),
+              );
             } else {
               return SizedBox(
                 height: SizeApp.customHeight(260),

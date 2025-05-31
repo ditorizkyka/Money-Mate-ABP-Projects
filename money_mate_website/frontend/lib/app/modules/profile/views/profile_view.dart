@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:frontend/app/modules/dashboard/views/dashboard_view.dart';
 import 'package:frontend/constant/constant.dart';
@@ -13,207 +12,304 @@ class ProfileView extends GetView<ProfileController> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xFFF5F5F5),
+
       body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            children: [
-              Header(),
-              Gap.h12,
-
-              // Profile Card
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-                child: Container(
-                  padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(15),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        spreadRadius: 1,
-                        blurRadius: 10,
-                        offset: Offset(0, 3),
-                      ),
-                    ],
+        child: Obx(() {
+          // Show loading indicator when isLoading is true
+          if (controller.isLoading.value) {
+            return Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  CircularProgressIndicator(
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      ColorApp.mainColor,
+                    ),
                   ),
-                  child: StreamBuilder(
-                    stream: FirebaseAuth.instance.authStateChanges(),
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return Center(child: CircularProgressIndicator());
-                      }
-                      if (snapshot.hasError) {
-                        return Center(child: Text('Error: ${snapshot.error}'));
-                      }
-                      if (!snapshot.hasData || snapshot.data == null) {
-                        return Center(child: Text('Anda belum masuk'));
-                      }
+                  Gap.h16,
+                  Text(
+                    'Memuat profil...',
+                    style: TextStyle(fontSize: 16, color: Colors.grey[600]),
+                  ),
+                ],
+              ),
+            );
+          }
 
-                      // User is logged in
-                      final user = snapshot.data as User;
-                      controller.userName.value =
-                          user.displayName ?? 'Pengguna';
-                      controller.userEmail.value =
-                          user.email ?? ' Tidak ada email';
-                      return Column(
-                        children: [
-                          // Profile Image
-                          Stack(
-                            children: [
-                              CircleAvatar(
-                                radius: 50,
-                                backgroundImage: NetworkImage(
-                                  'https://via.placeholder.com/150',
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 0,
-                                right: 0,
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    color: ColorApp.mainColor,
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: IconButton(
-                                    icon: Icon(
-                                      Icons.camera_alt,
-                                      color: Colors.white,
-                                      size: 20,
-                                    ),
-                                    onPressed: () {
-                                      controller.changeProfileImage();
-                                    },
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Gap.h16,
+          // Show main content when not loading
+          return SingleChildScrollView(
+            child: Column(
+              children: [
+                Header(),
+                Gap.h12,
 
-                          // User Name
-                          Text(
-                            controller.userName.value,
-                            style: TextStyle(
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
+                // Profile Card
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
+                  child: Container(
+                    padding: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+                    width: double.infinity,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.grey.withOpacity(0.1),
+                          spreadRadius: 1,
+                          blurRadius: 10,
+                          offset: Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: StreamBuilder(
+                      stream: FirebaseAuth.instance.authStateChanges(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                ColorApp.mainColor,
+                              ),
                             ),
-                          ),
+                          );
+                        }
+                        if (snapshot.hasError) {
+                          return Center(
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.error_outline,
+                                  color: Colors.red,
+                                  size: 48,
+                                ),
+                                Gap.h8,
+                                Text(
+                                  'Error: ${snapshot.error}',
+                                  textAlign: TextAlign.center,
+                                  style: TextStyle(color: Colors.red),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+                        if (!snapshot.hasData || snapshot.data == null) {
+                          return Center(
+                            child: Column(
+                              children: [
+                                Icon(
+                                  Icons.account_circle_outlined,
+                                  size: 48,
+                                  color: Colors.grey,
+                                ),
+                                Gap.h8,
+                                Text(
+                                  'Anda belum masuk',
+                                  style: TextStyle(color: Colors.grey[600]),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
 
-                          Gap.h8,
+                        // User is logged in
+                        return Column(
+                          children: [
+                            // Profile Image
+                            Stack(
+                              children: [
+                                Obx(
+                                  () => CircleAvatar(
+                                    radius: 50,
+                                    backgroundImage: NetworkImage(
+                                      controller
+                                              .profileImageUrl
+                                              .value
+                                              .isNotEmpty
+                                          ? controller.profileImageUrl.value
+                                          : 'https://via.placeholder.com/150',
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  right: 0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: ColorApp.mainColor,
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: IconButton(
+                                      icon: Icon(
+                                        Icons.camera_alt,
+                                        color: Colors.white,
+                                        size: 20,
+                                      ),
+                                      onPressed: () {
+                                        controller.changeProfileImage();
+                                      },
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Gap.h16,
 
-                          // User Email
-                          Text(
-                            controller.userEmail.value,
+                            // User Name
+                            Obx(
+                              () => Text(
+                                controller.name.value.isNotEmpty
+                                    ? controller.name.value
+                                    : 'Nama Anda',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                            ),
+
+                            Gap.h8,
+
+                            // User Email
+                            Obx(
+                              () => Text(
+                                controller.currentUser.value.email,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
+                            ),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
+                ),
+
+                // Menu Options
+                Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 30),
+                  child: Column(
+                    children: [
+                      // Edit Name
+                      _buildMenuTile(
+                        icon: Icons.edit,
+                        title: 'Ubah Nama',
+                        subtitle: 'Ganti nama profil Anda',
+                        onTap: () => _showEditNameDialog(context),
+                      ),
+                      Gap.h12,
+
+                      // Change Password
+                      _buildMenuTile(
+                        icon: Icons.lock_outline,
+                        title: 'Ubah Password',
+                        subtitle: 'Ganti password akun Anda',
+                        onTap: () => controller.changePassword(),
+                      ),
+                      Gap.h12,
+
+                      // Notifications
+                      _buildMenuTile(
+                        icon: Icons.notifications_outlined,
+                        title: 'Notifikasi',
+                        subtitle: 'Atur preferensi notifikasi',
+                        onTap: () => controller.manageNotifications(),
+                      ),
+                      Gap.h12,
+
+                      // Privacy Settings
+                      _buildMenuTile(
+                        icon: Icons.privacy_tip_outlined,
+                        title: 'Privasi',
+                        subtitle: 'Kelola pengaturan privasi',
+                        onTap: () => controller.privacySettings(),
+                      ),
+                      Gap.h32,
+
+                      // Logout Button
+                      Container(
+                        width: double.infinity,
+                        child: ElevatedButton.icon(
+                          onPressed:
+                              controller.isLoading.value
+                                  ? null
+                                  : () => _showLogoutDialog(context),
+                          icon: Icon(Icons.logout, color: Colors.white),
+                          label: Text(
+                            'Keluar',
                             style: TextStyle(
                               fontSize: 16,
-                              color: Colors.grey[600],
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
                             ),
                           ),
-                        ],
-                      );
-                    },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor:
+                                controller.isLoading.value
+                                    ? Colors.grey
+                                    : Colors.red,
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Gap.h12,
+
+                      // Delete Account Button
+                      SizedBox(
+                        width: double.infinity,
+                        child: OutlinedButton.icon(
+                          onPressed:
+                              controller.isLoading.value
+                                  ? null
+                                  : () => _showDeleteAccountDialog(context),
+                          icon: Icon(
+                            Icons.delete_forever,
+                            color:
+                                controller.isLoading.value
+                                    ? Colors.grey
+                                    : Colors.red,
+                          ),
+                          label: Text(
+                            'Hapus Akun',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color:
+                                  controller.isLoading.value
+                                      ? Colors.grey
+                                      : Colors.red,
+                            ),
+                          ),
+                          style: OutlinedButton.styleFrom(
+                            backgroundColor: Colors.white,
+
+                            side: BorderSide(
+                              color:
+                                  controller.isLoading.value
+                                      ? Colors.grey
+                                      : Colors.red,
+                            ),
+                            padding: EdgeInsets.symmetric(vertical: 15),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                        ),
+                      ),
+                      Gap.h32,
+                    ],
                   ),
                 ),
-              ),
-              // Menu Options
-              Padding(
-                padding: EdgeInsets.symmetric(horizontal: 30),
-                child: Column(
-                  children: [
-                    // Edit Name
-                    _buildMenuTile(
-                      icon: Icons.edit,
-                      title: 'Ubah Nama',
-                      subtitle: 'Ganti nama profil Anda',
-                      onTap: () => _showEditNameDialog(context),
-                    ),
-                    Gap.h12,
-
-                    // Change Password
-                    _buildMenuTile(
-                      icon: Icons.lock_outline,
-                      title: 'Ubah Password',
-                      subtitle: 'Ganti password akun Anda',
-                      onTap: () => controller.changePassword(),
-                    ),
-                    Gap.h12,
-
-                    // Notifications
-                    _buildMenuTile(
-                      icon: Icons.notifications_outlined,
-                      title: 'Notifikasi',
-                      subtitle: 'Atur preferensi notifikasi',
-                      onTap: () => controller.manageNotifications(),
-                    ),
-                    Gap.h12,
-
-                    // Privacy Settings
-                    _buildMenuTile(
-                      icon: Icons.privacy_tip_outlined,
-                      title: 'Privasi',
-                      subtitle: 'Kelola pengaturan privasi',
-                      onTap: () => controller.privacySettings(),
-                    ),
-                    Gap.h32,
-
-                    // Logout Button
-                    Container(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        onPressed: () => _showLogoutDialog(context),
-                        icon: Icon(Icons.logout, color: Colors.white),
-                        label: Text(
-                          'Keluar',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
-                        ),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.red,
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Gap.h12,
-
-                    // Delete Account Button
-                    Container(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () => _showDeleteAccountDialog(context),
-                        icon: Icon(Icons.delete_forever, color: Colors.red),
-                        label: Text(
-                          'Hapus Akun',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.red,
-                          ),
-                        ),
-                        style: OutlinedButton.styleFrom(
-                          side: BorderSide(color: Colors.red),
-                          padding: EdgeInsets.symmetric(vertical: 15),
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Gap.h32,
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
+              ],
+            ),
+          );
+        }),
       ),
     );
   }
@@ -224,41 +320,63 @@ class ProfileView extends GetView<ProfileController> {
     required String subtitle,
     required VoidCallback onTap,
   }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            spreadRadius: 1,
-            blurRadius: 5,
-            offset: Offset(0, 2),
+    return Obx(
+      () => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.1),
+              spreadRadius: 1,
+              blurRadius: 5,
+              offset: Offset(0, 2),
+            ),
+          ],
+        ),
+        child: ListTile(
+          onTap: controller.isLoading.value ? null : onTap,
+          leading: Container(
+            padding: EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color:
+                  controller.isLoading.value
+                      ? Colors.grey.withOpacity(0.1)
+                      : ColorApp.mainColor.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Icon(
+              icon,
+              color:
+                  controller.isLoading.value ? Colors.grey : ColorApp.mainColor,
+            ),
           ),
-        ],
-      ),
-      child: ListTile(
-        onTap: onTap,
-        leading: Container(
-          padding: EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: ColorApp.mainColor.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(8),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              color: controller.isLoading.value ? Colors.grey : Colors.black,
+            ),
           ),
-          child: Icon(icon, color: ColorApp.mainColor),
-        ),
-        title: Text(
-          title,
-          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-        ),
-        subtitle: Text(
-          subtitle,
-          style: TextStyle(color: Colors.grey[600], fontSize: 14),
-        ),
-        trailing: Icon(
-          Icons.arrow_forward_ios,
-          size: 16,
-          color: Colors.grey[400],
+          subtitle: Text(
+            subtitle,
+            style: TextStyle(
+              color:
+                  controller.isLoading.value
+                      ? Colors.grey[400]
+                      : Colors.grey[600],
+              fontSize: 14,
+            ),
+          ),
+          trailing: Icon(
+            Icons.arrow_forward_ios,
+            size: 16,
+            color:
+                controller.isLoading.value
+                    ? Colors.grey[300]
+                    : Colors.grey[400],
+          ),
         ),
       ),
     );
@@ -266,17 +384,40 @@ class ProfileView extends GetView<ProfileController> {
 
   void _showEditNameDialog(BuildContext context) {
     TextEditingController nameController = TextEditingController();
-    nameController.text = controller.userName.value;
 
     Get.dialog(
+      barrierDismissible: true,
+      useSafeArea: true,
       AlertDialog(
         backgroundColor: Colors.white,
         title: Text('Ubah Nama'),
-        content: TextField(
-          controller: nameController,
-          decoration: InputDecoration(
-            labelText: 'Nama Baru',
-            border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        content: SizedBox(
+          width: 400,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              TextField(
+                controller: nameController,
+                decoration: InputDecoration(
+                  labelText: 'Nama Baru',
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  prefixIcon: Icon(Icons.person_outline),
+                ),
+              ),
+              Gap.h8,
+              Obx(
+                () =>
+                    controller.isLoading.value
+                        ? LinearProgressIndicator(
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            ColorApp.mainColor,
+                          ),
+                        )
+                        : SizedBox.shrink(),
+              ),
+            ],
           ),
         ),
         actions: [
@@ -284,26 +425,47 @@ class ProfileView extends GetView<ProfileController> {
             onPressed: () => Get.back(),
             child: Text('Batal', style: TextStyle(color: Colors.black)),
           ),
-          ElevatedButton(
-            onPressed: () {
-              if (nameController.text.isNotEmpty) {
-                controller.updateUserName(nameController.text);
-                Get.back();
-                Get.snackbar(
-                  'Berhasil',
-                  'Nama berhasil diubah',
-                  backgroundColor: Colors.green,
-                  colorText: Colors.white,
-                );
-              }
-            },
-            child: Text('Simpan'),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Obx(
+            () => ElevatedButton(
+              onPressed:
+                  controller.isLoading.value
+                      ? null
+                      : () {
+                        if (nameController.text.trim().isNotEmpty) {
+                          controller.setNewName(nameController.text.trim());
+                          Get.back();
+                        } else {
+                          Get.snackbar(
+                            'Error',
+                            'Nama tidak boleh kosong',
+                            backgroundColor: Colors.red,
+                            colorText: Colors.white,
+                          );
+                        }
+                      },
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor:
+                    controller.isLoading.value
+                        ? Colors.grey
+                        : ColorApp.mainColor,
+                foregroundColor: Colors.white,
               ),
-              backgroundColor: ColorApp.mainColor,
-              foregroundColor: Colors.white,
+              child:
+                  controller.isLoading.value
+                      ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                      : Text('Simpan'),
             ),
           ),
         ],
@@ -322,19 +484,36 @@ class ProfileView extends GetView<ProfileController> {
             onPressed: () => Get.back(),
             child: Text('Batal', style: TextStyle(color: Colors.black)),
           ),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              controller.logout();
-            },
-
-            child: Text('Keluar'),
-            style: ElevatedButton.styleFrom(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+          Obx(
+            () => ElevatedButton(
+              onPressed:
+                  controller.isLoading.value
+                      ? null
+                      : () {
+                        Get.back();
+                        controller.logout();
+                      },
+              style: ElevatedButton.styleFrom(
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                backgroundColor:
+                    controller.isLoading.value ? Colors.grey : Colors.red,
+                foregroundColor: Colors.white,
               ),
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+              child:
+                  controller.isLoading.value
+                      ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                      : Text('Keluar'),
             ),
           ),
         ],
@@ -344,30 +523,62 @@ class ProfileView extends GetView<ProfileController> {
 
   void _showDeleteAccountDialog(BuildContext context) {
     Get.dialog(
+      barrierDismissible: true,
+      useSafeArea: true,
       AlertDialog(
-        title: Text('Hapus Akun', style: TextStyle(color: Colors.red)),
+        backgroundColor: Colors.white,
+        title: Center(
+          child: Text(
+            'Hapus Akun',
+            style: TypographyApp.headline2.copyWith(color: Colors.red),
+          ),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.warning_amber_rounded, color: Colors.red, size: 48),
             Gap.h16,
             Text(
-              'Apakah Anda yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan dan semua data Anda akan dihapus secara permanen.',
+              'Apakah Anda yakin ingin menghapus akun? Tindakan ini tidak dapat dibatalkan\n dan semua data Anda akan dihapus secara permanen.',
               textAlign: TextAlign.center,
             ),
           ],
         ),
         actions: [
-          TextButton(onPressed: () => Get.back(), child: Text('Batal')),
-          ElevatedButton(
-            onPressed: () {
-              Get.back();
-              controller.deleteAccount();
-            },
-            child: Text('Hapus Akun'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+          TextButton(
+            onPressed: () => Get.back(),
+            child: Text('Batal', style: TextStyle(color: Colors.black)),
+          ),
+          Obx(
+            () => ElevatedButton(
+              onPressed:
+                  controller.isLoading.value
+                      ? null
+                      : () {
+                        Get.back();
+                        controller.deleteAccount();
+                      },
+              style: ElevatedButton.styleFrom(
+                backgroundColor:
+                    controller.isLoading.value ? Colors.grey : Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10),
+                ),
+              ),
+              child:
+                  controller.isLoading.value
+                      ? SizedBox(
+                        width: 20,
+                        height: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            Colors.white,
+                          ),
+                        ),
+                      )
+                      : Text('Hapus Akun'),
             ),
           ),
         ],

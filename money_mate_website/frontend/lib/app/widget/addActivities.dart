@@ -6,6 +6,7 @@ import 'package:frontend/app/shared/constanta.dart';
 import 'package:frontend/constant/constant.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
+
 // Model untuk expense category
 class ExpenseCategory {
   final String id;
@@ -241,7 +242,7 @@ class AddActivitiesController extends GetxController {
 
       // Close page after short delay
       Future.delayed(Duration(seconds: 1), () {
-        Get.back();
+        Get.offAllNamed('/dashboard');
       });
     } catch (e) {
       Get.snackbar(
@@ -285,7 +286,7 @@ class AddActivities extends StatelessWidget {
         elevation: 0,
         leading: IconButton(
           icon: Icon(Icons.close, color: Colors.black87),
-          onPressed: () => Get.back(),
+          onPressed: () => Get.offAllNamed('/dashboard'),
         ),
         title: Text(
           'New Activity',
@@ -457,7 +458,7 @@ class AddActivities extends StatelessWidget {
                                   ? null
                                   : controller.submitForm,
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Color(0xFF6366F1),
+                            backgroundColor: ColorApp.mainColor,
                             foregroundColor: Colors.white,
                             elevation: 0,
                             shape: RoundedRectangleBorder(
@@ -501,7 +502,7 @@ class AddActivities extends StatelessWidget {
                       width: double.infinity,
                       height: 50,
                       child: OutlinedButton(
-                        onPressed: () => Get.back(),
+                        onPressed: () => Get.offAllNamed('/dashboard'),
                         style: OutlinedButton.styleFrom(
                           foregroundColor: Colors.grey[600],
                           side: BorderSide(color: Colors.grey[300]!),

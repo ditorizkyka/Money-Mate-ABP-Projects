@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:flutter/material.dart';
 import 'package:frontend/app/modules/activities/controllers/activities_controller.dart';
+import 'package:frontend/app/modules/profile/controllers/profile_controller.dart';
 import 'package:frontend/app/shared/constanta.dart';
+
 import 'package:get/get.dart';
 
 class DashboardController extends GetxController {
@@ -14,13 +17,13 @@ class DashboardController extends GetxController {
   void onInit() {
     super.onInit();
     var controller = Get.put(ActivitiesController());
+    var profileController = Get.put(ProfileController());
     final currentUser = FirebaseAuth.instance.currentUser;
 
     if (currentUser != null) {
       controller.getActivityById(currentUser.uid);
       controller.getDashboardActivities(currentUser.uid);
-      // Load existing limit when controller initializes
-
+      profileController.loadUserData(currentUser.uid);
       loadUserLimit();
     } else {
       Get.snackbar("Error", "User not logged in");
@@ -79,6 +82,10 @@ class DashboardController extends GetxController {
         data: {'limit': limit.value},
       );
 
+      ProfileController profileController = Get.find<ProfileController>();
+      profileController.currentUser.value.limit = double.parse(
+        limit.value.toString(),
+      );
       isLoading.value = false;
 
       if (response.statusCode == 200) {

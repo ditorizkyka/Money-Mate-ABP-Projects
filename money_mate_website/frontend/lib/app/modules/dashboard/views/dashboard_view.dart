@@ -25,7 +25,7 @@ class DashboardView extends GetView<DashboardController> {
             MaterialPageRoute(builder: (context) => AddActivities()),
           );
         },
-        backgroundColor: Color(0xFF6366F1),
+        backgroundColor: ColorApp.mainColor,
         foregroundColor: Colors.white,
         elevation: 6,
         child: Icon(Icons.add, size: 28),
@@ -87,6 +87,7 @@ class InvestmentDashboard extends StatelessWidget {
             children: [
               // Header
               _buildWelcomeSection(),
+
               SizedBox(height: 30),
 
               // Responsive Grid Layout
@@ -371,6 +372,7 @@ class Header extends StatelessWidget {
                 _buildLogo(),
                 _buildNavigation(),
                 const Spacer(),
+
                 _buildUserProfile(),
               ],
             );
