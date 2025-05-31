@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "782965043473",
+    "project_id": "money-mate-mobile",
+    "storage_bucket": "money-mate-mobile.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:782965043473:android:51360840273bdd720b5cb0",
+        "android_client_info": {
+          "package_name": "com.abpProject.money_mate_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAI0rdK0wlFgEWpbRcm0xiMb8rX5iftnng"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:782965043473:android:85b2829efb713e730b5cb0",
+        "android_client_info": {
+          "package_name": "com.moneymate.frontend"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAI0rdK0wlFgEWpbRcm0xiMb8rX5iftnng"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
