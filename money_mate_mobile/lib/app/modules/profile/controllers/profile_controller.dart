@@ -1,12 +1,15 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:hive_flutter/adapters.dart';
+import 'package:money_mate_mobile/app/shared/constanta.dart';
 
 class ProfileController extends GetxController {
   //TODO: Implement ProfileController
   var name = ''.obs;
   var email = ''.obs;
+  var isLoading = false.obs;
 
   Future<void> getData() async {
     await FirebaseFirestore.instance.collection('users').get().then((value) {
