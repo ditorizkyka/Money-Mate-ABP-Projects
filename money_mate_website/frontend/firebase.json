@@ -1,1 +1,40 @@
-{"flutter":{"platforms":{"dart":{"lib/firebase_options.dart":{"projectId":"money-mate-mobile","configurations":{"android":"1:782965043473:android:85b2829efb713e730b5cb0","ios":"1:782965043473:ios:a986a23d5b1b7dd70b5cb0","macos":"1:782965043473:ios:a986a23d5b1b7dd70b5cb0","web":"1:782965043473:web:5dc0dc354627a6ed0b5cb0","windows":"1:782965043473:web:13edeff94bad400c0b5cb0"}}},"android":{"default":{"projectId":"money-mate-mobile","appId":"1:782965043473:android:85b2829efb713e730b5cb0","fileOutput":"android/app/google-services.json"}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "money-mate-mobile",
+          "configurations": {
+            "android": "1:782965043473:android:85b2829efb713e730b5cb0",
+            "ios": "1:782965043473:ios:a986a23d5b1b7dd70b5cb0",
+            "macos": "1:782965043473:ios:a986a23d5b1b7dd70b5cb0",
+            "web": "1:782965043473:web:5dc0dc354627a6ed0b5cb0",
+            "windows": "1:782965043473:web:13edeff94bad400c0b5cb0"
+          }
+        }
+      },
+      "android": {
+        "default": {
+          "projectId": "money-mate-mobile",
+          "appId": "1:782965043473:android:85b2829efb713e730b5cb0",
+          "fileOutput": "android/app/google-services.json"
+        }
+      }
+    }
+  },
+  "hosting": {
+    "site" : "money-mate-abp",
+    "public": "build/web",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      }
+    ]
+  }
+}

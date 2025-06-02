@@ -89,7 +89,7 @@ class SignupController extends GetxController {
   }) async {
     try {
       final response = await dio.post(
-        'http://localhost:8000/api/user',
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/user/',
         data: {
           'firebase_uid': uid,
           'name': fullname,
