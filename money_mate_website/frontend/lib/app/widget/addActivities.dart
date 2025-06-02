@@ -62,7 +62,9 @@ class AddActivitiesController extends GetxController {
   }) async {
     try {
       final response = await dio.post(
-        'http://localhost:8000/api/activities', // endpoint Laravel Anda
+
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/activities', // endpoint Laravel Anda
+
         data: {
           'firebase_uid': uid,
           'name': nameActivity,

@@ -117,18 +117,15 @@ class ProfileView extends GetView<ProfileController> {
                           children: [
                             // Profile Image
                             Stack(
-                              children: [
-                                Obx(
-                                  () => CircleAvatar(
-                                    radius: 50,
-                                    backgroundImage: NetworkImage(
-                                      controller
-                                              .profileImageUrl
-                                              .value
-                                              .isNotEmpty
-                                          ? controller.profileImageUrl.value
-                                          : 'https://via.placeholder.com/150',
-                                    ),
+                              children: 
+                                CircleAvatar(
+                                  radius: 50,
+                                  backgroundColor: ColorApp.mainColor
+                                      .withOpacity(0.1),
+                                  child: Icon(
+                                    Icons.person,
+                                    color: ColorApp.mainColor,
+                                    size: 50,
                                   ),
                                 ),
                                 Positioned(

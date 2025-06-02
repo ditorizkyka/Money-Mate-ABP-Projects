@@ -38,7 +38,9 @@ class DashboardController extends GetxController {
         isLoading.value = true;
 
         // Fetch user data to get current limit
-        final response = await dio.get('http://localhost:8000/api/user/$uid');
+        final response = await dio.get(
+          'https://money-mate-app-main-ss3clf.laravel.cloud/api/user/$uid',
+        );
 
         if (response.statusCode == 200 && response.data != null) {
           // Assuming the API returns user data with limit field
@@ -78,7 +80,7 @@ class DashboardController extends GetxController {
 
       // Make API call to update limit
       final response = await dio.put(
-        'http://localhost:8000/api/user/$uid',
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/user/$uid',
         data: {'limit': limit.value},
       );
 

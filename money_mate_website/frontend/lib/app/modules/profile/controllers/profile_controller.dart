@@ -35,7 +35,7 @@ class ProfileController extends GetxController {
     try {
       isLoading.value = true;
       final response = await dio.get(
-        'http://localhost:8000/api/user/$uid',
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/user/$uid',
         options: Options(
           headers: {
             'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ class ProfileController extends GetxController {
 
       // Update backend
       final response = await dio.put(
-        'http://localhost:8000/api/user/$uid',
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/user/$uid',
         data: {'name': newName.trim(), '_method': 'PUT'},
         options: Options(
           headers: {
@@ -282,11 +282,8 @@ class ProfileController extends GetxController {
         Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
-            children: [
-              CircularProgressIndicator(),
-              SizedBox(height: 16),
-              Text('Menghapus akun...', style: TextStyle(color: Colors.white)),
-            ],
+
+            children: [CircularProgressIndicator()],
           ),
         ),
         barrierDismissible: false,
@@ -354,7 +351,7 @@ class ProfileController extends GetxController {
   Future<void> _deleteUserFromBackend(String uid) async {
     try {
       final response = await dio.delete(
-        'http://localhost:8000/api/user/$uid',
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/user/$uid',
         options: Options(
           headers: {
             'Content-Type': 'application/json',

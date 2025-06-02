@@ -95,11 +95,13 @@ class LimitSpentCard extends StatelessWidget {
                           color: Colors.red[100],
                           borderRadius: BorderRadius.circular(4),
                         ),
-                        child: Text(
-                          'Your current spent is Rp5.000, 000',
-                          style: TextStyle(
-                            fontSize: 10,
-                            color: Colors.red[700],
+                        child: Obx(
+                          () => Text(
+                            'Your current spent is Rp${profileController.currentUser.value.totalSpent.toString().replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: Colors.red[700],
+                            ),
                           ),
                         ),
                       ),

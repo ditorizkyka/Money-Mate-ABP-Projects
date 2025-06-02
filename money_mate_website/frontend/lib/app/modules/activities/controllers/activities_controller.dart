@@ -56,7 +56,7 @@ class ActivitiesController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _dio.get(
-        'http://localhost:8000/api/activities/$activityId',
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/activities/$activityId',
         options: Options(
           headers: {
             'Content-Type': 'application/json',
@@ -99,7 +99,7 @@ class ActivitiesController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _dio.get(
-        'http://localhost:8000/api/activities/$activityId',
+        'https://money-mate-app-main-ss3clf.laravel.cloud/api/activities/$activityId',
         options: Options(
           headers: {
             'Content-Type': 'application/json',
