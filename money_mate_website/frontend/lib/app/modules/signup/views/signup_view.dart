@@ -4,7 +4,6 @@ import 'package:frontend/app/widget/authfield.dart';
 import 'package:frontend/app/widget/buttonApp.dart';
 import 'package:frontend/constant/constant.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../controllers/signup_controller.dart';
 
 class SignupView extends GetView<SignupController> {
@@ -125,6 +124,7 @@ class SignupView extends GetView<SignupController> {
             child: Center(
               child: SingleChildScrollView(
                 child: Container(
+
                   constraints: const BoxConstraints(maxWidth: 600),
                   decoration: BoxDecoration(
                     color: Colors.white,
@@ -219,6 +219,7 @@ class SignupView extends GetView<SignupController> {
                             },
                             style: TextButton.styleFrom(
                               padding: EdgeInsets.symmetric(horizontal: 8),
+
                             ),
                             child: Text(
                               'Sign In',
@@ -379,6 +380,7 @@ class SignupView extends GetView<SignupController> {
     }
     return 'U';
   }
+
 
   // Custom compact spent limit field
 }

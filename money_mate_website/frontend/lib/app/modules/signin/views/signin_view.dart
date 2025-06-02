@@ -4,7 +4,6 @@ import 'package:frontend/app/widget/authfield.dart';
 import 'package:frontend/app/widget/buttonApp.dart';
 import 'package:frontend/constant/constant.dart';
 import 'package:google_fonts/google_fonts.dart';
-
 import '../controllers/signin_controller.dart';
 
 class SigninView extends GetView<SigninController> {
@@ -118,14 +117,12 @@ class SigninView extends GetView<SigninController> {
               ),
             ),
           ),
-
           Expanded(
             flex: 1,
             child: Center(
               child: SingleChildScrollView(
                 child: Container(
                   constraints: const BoxConstraints(maxWidth: 600),
-
                   padding: const EdgeInsets.symmetric(
                     horizontal: 30,
                     vertical:
@@ -289,6 +286,7 @@ class SigninView extends GetView<SigninController> {
     }
     return 'U';
   }
+
 
   // Custom compact auth field
 }

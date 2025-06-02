@@ -282,6 +282,7 @@ class ProfileController extends GetxController {
         Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
+
             children: [CircularProgressIndicator()],
           ),
         ),

@@ -117,7 +117,7 @@ class ProfileView extends GetView<ProfileController> {
                           children: [
                             // Profile Image
                             Stack(
-                              children: [
+                              children: 
                                 CircleAvatar(
                                   radius: 50,
                                   backgroundColor: ColorApp.mainColor
@@ -128,7 +128,6 @@ class ProfileView extends GetView<ProfileController> {
                                     size: 50,
                                   ),
                                 ),
-
                                 Positioned(
                                   bottom: 0,
                                   right: 0,
